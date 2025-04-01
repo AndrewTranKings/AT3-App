@@ -6,10 +6,16 @@ app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///example_test_db.db'
 db.init_app(app)
 
+"""
 @app.route('/', methods=['GET'])
 def dashboard():
     all_tasks = Task.query.all()
     return render_template('dashboard.html', tasks=all_tasks)
+"""
+
+@app.route('/', methods=['GET'])
+def calendar():
+    return render_template('calendar.html')
 
 @app.route('/create_task', methods=['POST', 'GET'])
 def create_task():
