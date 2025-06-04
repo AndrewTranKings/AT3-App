@@ -9,22 +9,22 @@ body {
 
 /* Title and Subtitle */
 #title {
-    font-size: 2rem;
+    font-size: 2.5rem;
     color: #333;
     margin-bottom: 5px;
 }
 
 #subtitle {
-    font-size: 1.2rem;
+    font-size: 1.5rem;
     color: #555;
     margin-bottom: 20px;
 }
 
-/* Calendar Container - Full Width */
+/* Calendar Container */
 #clendarContainer {
-    width: 100%;
     display: flex;
     justify-content: center;
+    align-items: center;
     margin-top: 20px;
 }
 
@@ -34,20 +34,17 @@ body {
     padding: 20px;
     border-radius: 10px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    width: 95%;
-    max-width: 1400px; /* Prevents it from getting too stretched on large screens */
+    width: 350px;
 }
 
 /* Calendar Heading */
 #calendarHeading {
     display: flex;
     justify-content: space-between;
-    align-items: center;
-    font-size: 1rem;
+    font-size: 1.2rem;
     font-weight: bold;
     margin-bottom: 10px;
     color: #444;
-    padding: 0 15px;
 }
 
 /* Habit Title */
@@ -58,54 +55,25 @@ body {
 /* Calendar Grid */
 #tracker {
     display: grid;
-    grid-template-columns: repeat(7, 1fr); /* 7 columns for a week */
-    gap: 8px;
+    grid-template-rows: repeat(5, 1fr);
+    gap: 5px;
+}
+
+
+
+
+/*Styling for the days*/
+.days{
+    display:flex
+}
+
+.day{
+    width: 30px;
+    margin: 3px;
     padding: 10px;
-    justify-items: center;
-}
-
-/* Individual Day Boxes - Circular and Balanced */
-.day {
-    width: 50px; /* Fixed size */
-    height: 50px; /* Keeps it circular */
-    background: #e9ecef;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 0.9rem;
-    font-weight: bold;
-    border-radius: 50%; /* Circular */
-    cursor: pointer;
-    transition: 0.3s;
-    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
-}
-
-/* Hover and Active States */
-.day:hover {
-    background: #007bff;
-    color: white;
-    transform: scale(1.1);
-}
-
-.day.active {
-    background: #28a745;
-    color: white;
-}
-
-/* Reset Button */
-#resetButton {
-    margin-top: 20px;
-    padding: 8px 16px;
-    font-size: 0.9rem;
-    color: white;
-    background: #dc3545;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: 0.3s;
-}
-
-#resetButton:hover {
-    background: #c82333;
-    transform: scale(1.05);
+    font-size: 15px;
+    text-align: center;
+    border-radius: 20px;
+    border: 2px solid black;
+    /*background-color: pink;*/
 }
