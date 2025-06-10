@@ -2,17 +2,14 @@ from flask_sqlalchemy import SQLAlchemy
 
 db = SQLAlchemy()
 
-class Habit(db.Model):
+class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.String(100), nullable=False)
-    description = db.Column(db.String(200), nullable=True)
-    priority = db.Column(db.Integer, default=0)
-    is_complete = db.Column(db.Boolean, default=False)
+    username = db.Column(db.String(100), nullable=False)
+    password = db.Column(db.String(100), nullable=False)
 
-    def __init__(self, title, description=None, priority=0):
-        self.title = title
-        self.description = description
-        self.priority = priority
-        self.is_complete = False
+    def __init__(self, username, password):
+        self.username = username
+        self.password = password
+    
 
 
