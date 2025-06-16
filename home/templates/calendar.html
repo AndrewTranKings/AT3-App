@@ -32,8 +32,7 @@
     <!--LIST OF THE USER'S HABITS-->
     <div class="habit_list">
         {% for habit in all_user_habits %}
-            <li>{{ habit.title }} (Habit ID: {{ habit.id }})</li>
-            <p>For User: {{ habit.user_id }}</p>
+            <li>{{ habit.title }} (Unique Habit ID: {{ habit.id }})</li>
         {% endfor %}
     </div>
 
@@ -96,7 +95,7 @@
         </div>
      </div>
      <form action="{{ url_for('create_habit') }}" method="get">
-        <button type="submit">Create Habit</button>
+        <button type="submit" class="create_habit_btn">Create Habit</button>
     </form>
      <button id="resetButton">Reset Button</button>
 

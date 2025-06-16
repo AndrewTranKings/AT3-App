@@ -168,3 +168,27 @@ ul li:hover ul.dropdown {
     display: block;
 }
 
+/*Create Habit Button section*/
+.create_habit_btn {
+    background-color: #4a90e2; /* cornflower blue */
+    color: white;
+    padding: 12px 24px;
+    border: none;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    margin: 20px auto;
+    display: block;
+}
+
+.create_habit_btn:hover {
+    background-color: #357ABD; /* slightly darker blue */
+    transform: translateY(-2px);
+}
+
+.create_habit_btn:active {
+    transform: scale(0.98);
+}

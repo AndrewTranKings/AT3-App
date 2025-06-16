@@ -6,6 +6,7 @@
     <title>Profile</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/profile.css') }}">
 </head>
+<!--NAV BAR-->
 <body>
     <nav>
         <ul>
@@ -18,13 +19,13 @@
                     <li><a href="{{url_for('shop')}}">Shop</a></li>
                 </ul>
             </li>
-            <li><a href="create_task.html">Dashboard</a></li>
+            <li><a href="#">Dashboard</a></li>
         </ul>
     </nav>
     <!-- Profile Section -->
     <div class="profile-container">
         <img src="{{ url_for('static', filename='images/DefaultProfilePic.png') }}" alt="Profile Picture" class="profile-pic">
-        <h2 class="username">John Doe</h2>
+        <h2 class="username">{{user.username}}</h2>
         <p class="email">johndoe@example.com</p>
         <p class="bio">Hi, I'm John! I use this app to track my habits and stay productive.</p>
         <button class="edit-button">Edit Profile</button>

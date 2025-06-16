@@ -22,7 +22,13 @@ def calendar():
 
 @app.route('/profile', methods=['GET'])
 def profile():
-    return render_template('profile.html')
+    #Session management
+    user_id = session.get('user_id')
+    if not user_id:
+        return redirect(url_for('login'))
+    
+    user = User.query.get(user_id)
+    return render_template('profile.html', user=user)
 
 @app.route('/community')
 def community():
@@ -48,7 +54,6 @@ def login():
         else:
             return "Invalid username or password", 401
 
-#FIX PROBLEM: ONCE SIGNING UP, THE USER STILL IS LOGGED IN WITH OLD ACCOUNT
 @app.route('/signup', methods=['GET', 'POST'])
 def signup(): #The same as the login route without verification as the user is creating a new account
     if request.method == 'GET':
@@ -56,7 +61,10 @@ def signup(): #The same as the login route without verification as the user is c
     elif request.method == 'POST':
         username_input = request.form.get('username')
         password_input = request.form.get('password')
-        create_new_user(username_input, password_input)
+
+        new_user = create_new_user(username_input, password_input)
+        session['user_id'] = new_user.id #Automatically logs in new account
+
         return redirect(url_for('calendar'))
     
 @app.route('/signout')
@@ -76,7 +84,7 @@ def create_habit():
         #Get data from create_habit.html
         title_input = request.form.get('title')
         category_input = request.form.get('category')
-        user_id_input = request.form.get('user_id')
+        user_id_input = user_id #Take the user_id directly from the session
         create_new_habit(title_input, category_input, user_id_input)
         return redirect(url_for('calendar'))
 
