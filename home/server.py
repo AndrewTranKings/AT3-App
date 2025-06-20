@@ -1,8 +1,9 @@
 from flask import Flask, render_template, url_for, redirect, request, jsonify, session
-from data import db, User, Habit
+from data import db, User, Habit, HabitLog
 from user import create_new_user
 from habit import create_new_habit
 import os
+from datetime import datetime
 
 app = Flask(__name__)
 app.secret_key = os.urandom(24) #Generate a random session key
@@ -87,6 +88,58 @@ def create_habit():
         user_id_input = user_id #Take the user_id directly from the session
         create_new_habit(title_input, category_input, user_id_input)
         return redirect(url_for('calendar'))
+
+@app.route('/log_habit', methods=['POST'])
+def log_habit():
+    data = request.get_json()
+    habit_id = int(data['habit_id'])
+    date_str = data['date']  # e.g., '6-10-2025'
+    completed = data['completed']
+
+    date_obj = datetime.strptime(date_str, "%m-%d-%Y").date()
+
+    log = HabitLog.query.filter_by(habit_id=habit_id, date=date_obj).first()
+    if completed:
+        if not log:
+            log = HabitLog(habit_id=habit_id, date=date_obj)
+            db.session.add(log)
+    else:
+        if log:
+            db.session.delete(log)
+
+    db.session.commit()
+    return jsonify({"status": "success"})
+
+@app.route('/get_habit_logs')
+def get_habit_logs():
+    habit_id = int(request.args.get('habit_id'))
+    month = int(request.args.get('month'))
+    year = int(request.args.get('year'))
+
+    logs = HabitLog.query.filter_by(habit_id=habit_id).all()
+
+    result = []
+    for log in logs:
+        if log.date.month == month and log.date.year == year:
+            result.append(f"{log.date.month}-{log.date.day}-{log.date.year}")
+
+    return jsonify(result)
+
+@app.route('/reset_habit_logs', methods=['POST'])
+def reset_habit_logs():
+    data = request.get_json()
+    habit_id = int(data['habit_id'])
+    month = int(data['month'])
+    year = int(data['year'])
+
+    logs = HabitLog.query.filter_by(habit_id=habit_id).all()
+    for log in logs:
+        if log.date.month == month and log.date.year == year:
+            db.session.delete(log)
+    db.session.commit()
+
+    return jsonify({"status": "reset"})
+
 
 
 if __name__ == '__main__':

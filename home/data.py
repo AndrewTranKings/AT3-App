@@ -1,4 +1,5 @@
 from flask_sqlalchemy import SQLAlchemy
+from datetime import date
 
 db = SQLAlchemy()
 
@@ -28,5 +29,11 @@ class HabitLog(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     date = db.Column(db.Date, nullable=False)
     habit_id = db.Column(db.Integer, db.ForeignKey('habit.id'), nullable=False)
+
+    def _init__(self, date, habit_id):
+        self.date = date
+        self.habit_id = habit_id
+
+
 
 

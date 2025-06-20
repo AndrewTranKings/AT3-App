@@ -192,3 +192,24 @@ ul li:hover ul.dropdown {
 .create_habit_btn:active {
     transform: scale(0.98);
 }
+
+/*Habit buttons at the top of calendar*/
+#habit_buttons {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.habit_btn {
+    padding: 10px 15px;
+    border: none;
+    border-radius: 6px;
+    background-color: #e0e0e0;
+    cursor: pointer;
+}
+
+.habit_btn.active {
+    background-color: #007BFF;
+    color: white;
+}
