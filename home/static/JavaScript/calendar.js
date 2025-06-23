@@ -1,11 +1,9 @@
-// === Continue to add new JavaScript logic ===
-
 var date = new Date();
 var currentMonth = date.getMonth();
 var currentDay = date.getDay();
 var currentDate = date.getDate();
 var currentYear = date.getFullYear();
-var selectedHabitId = null; // ✅ Stores the ID of the selected habit
+var selectedHabitId = null; //Stores the ID of the selected habit
 
 var months = [
     "January", "February", "March", "April", "May", "June",
@@ -29,7 +27,7 @@ var daysInThisMonth = daysInTheMonthList[currentMonth];
 var daysCompleted = 0;
 var totalDays = document.getElementById("totalDays");
 
-/* === SETUP CALENDAR DAYS === */
+/*SETUP CALENDAR DAYS*/
 var dayCount = 0;
 var rowCount = 0;
 var days = document.getElementsByClassName("days");
@@ -54,8 +52,8 @@ for (var i = 0; i < days.length; i++) {
     rowCount++;
 }
 
-/* === Re-render calendar for selected habit (Step 3/4) === */
-function updateCalendarForSelectedHabit() {
+/*UPDATE CALENDAR DEPENDING ON SELECTED HABIT*/
+function updateCalendarForSelectedHabit() { //Helper function
     if (!selectedHabitId) return;
     daysCompleted = 0;
 
@@ -82,7 +80,7 @@ function updateCalendarForSelectedHabit() {
         });
 }
 
-/* === HANDLE CLICK ON CALENDAR DAYS === */
+/*HANDLE CLICK ON CALENDAR DAYS*/
 var dayDivs = document.querySelectorAll(".day");
 for (let i = 0; i < currentDate; i++) {
     dayDivs[i].onclick = function (e) {
@@ -97,18 +95,17 @@ for (let i = 0; i < currentDate; i++) {
         let dateKey = `${currentMonth + 1}-${num}-${currentYear}`;
         let selectedDate = document.getElementById("day" + num);
         
-        // ✅ CHANGED: Toggle based on current background color
-        // Use getComputedStyle to reliably get current background color
+        //Find days that are already logged by exact matching cornflowerblue colour
         let currentBgColor = window.getComputedStyle(selectedDate).backgroundColor;
-        let wasAlreadyLogged = (currentBgColor === "rgb(100, 149, 237)"); // CornflowerBlue rgb
+        let wasAlreadyLogged = (currentBgColor === "rgb(100, 149, 237)");
         let markAsCompleted = !wasAlreadyLogged;
 
-        // ✅ CHANGED: Immediately update UI
+        //Immediately update UI to blue or white depending on if already logged or no
         selectedDate.style.backgroundColor = markAsCompleted ? "CornflowerBlue" : "white";
         daysCompleted += markAsCompleted ? 1 : -1;
         totalDays.innerHTML = `${daysCompleted}/${daysInThisMonth}`;
 
-        // ✅ CHANGED: Send correct state to server
+        //Contact with server route of same name
         fetch('/log_habit', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -129,7 +126,7 @@ for (let i = 0; i < currentDate; i++) {
     };
 }
 
-/* === RESET BUTTON FUNCTIONALITY === */
+/*RESET BUTTON FUNCTIONALITY*/
 var resetButton = document.getElementById("resetButton");
 resetButton.onclick = function () {
     if (!selectedHabitId) {
@@ -137,7 +134,7 @@ resetButton.onclick = function () {
         return;
     }
 
-    // ✅ Optional: Ask for confirmation
+    //Confirmation before user deletes progress
     if (!confirm("Are you sure you want to reset all logs for this habit this month?")) return;
 
     fetch('/reset_habit_logs', {
@@ -165,12 +162,16 @@ resetButton.onclick = function () {
     });
 };
 
-/* === HABIT BUTTONS (Step 2 & 3) === */
+/*HABIT BUTTONS*/
 const habitButtons = document.querySelectorAll('.habit_btn');
 habitButtons.forEach(button => {
     button.addEventListener('click', () => {
         selectedHabitId = button.getAttribute('data-habit-id');
         console.log("Selected Habit ID:", selectedHabitId);
-        updateCalendarForSelectedHabit(); // ✅ Refresh calendar based on server logs
+        updateCalendarForSelectedHabit();
+
+        /*HELPS WITH CSS FOR HIGHLIGHTING SELECTED HABIT*/
+        habitButtons.forEach(btn => btn.classList.remove('selected')); //Removes highlight from each button
+        button.classList.add('selected'); //Only highlights the selected habit
     });
 });

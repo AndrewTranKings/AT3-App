@@ -1,13 +1,15 @@
 from flask import Flask, render_template, url_for, redirect, request, jsonify, session
 from data import db, User, Habit, HabitLog
-from user import create_new_user
+from user import create_new_user, update_user_profile
 from habit import create_new_habit
 import os
 from datetime import datetime
 
 app = Flask(__name__)
 app.secret_key = os.urandom(24) #Generate a random session key
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///app_database.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///app_database_test.db'
+upload_folder = app.config['UPLOAD_FOLDER'] = os.path.join('home', 'static', 'Images', 'profile_pics') #Folder for uploaded profile pictures
+app.config['MAX_CONTENT_LENGTH'] = 2 * 1024 * 1024  # 2MB limit
 db.init_app(app)
 
 
@@ -30,6 +32,24 @@ def profile():
     
     user = User.query.get(user_id)
     return render_template('profile.html', user=user)
+
+@app.route('/edit_profile', methods=['GET', 'POST'])
+def edit_profile():
+    user_id = session.get('user_id') #Check for a valid session first
+    if not user_id:
+        return redirect(url_for('login'))
+    
+    if request.method == 'GET':
+        return render_template('edit_profile.html', user=user_id) 
+    elif request.method == 'POST':
+        
+        #Get data from edit_profile.html
+        email_input = request.form.get('email')
+        bio_input = request.form.get('bio')
+        pfp_input = request.files.get('profile_pic') #request.file for files
+        update_user_profile(user_id, email_input, bio_input, pfp_input, upload_folder)
+        #pass in the uploads folder for access in helper function ^
+        return redirect(url_for('profile'))
 
 @app.route('/community')
 def community():
@@ -88,12 +108,12 @@ def create_habit():
         user_id_input = user_id #Take the user_id directly from the session
         create_new_habit(title_input, category_input, user_id_input)
         return redirect(url_for('calendar'))
-
+    
 @app.route('/log_habit', methods=['POST'])
 def log_habit():
     data = request.get_json()
     habit_id = int(data['habit_id'])
-    date_str = data['date']  # e.g., '6-10-2025'
+    date_str = data['date']  # e.g. '6-10-2025'
     completed = data['completed']
 
     date_obj = datetime.strptime(date_str, "%m-%d-%Y").date()

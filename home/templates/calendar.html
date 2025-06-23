@@ -29,7 +29,7 @@
     <h1 id = "title">Month</h1>
     <h2 id = "subtitle">Monthly Habit Tracker</h2>
 
-    <!--LIST OF THE USER'S HABITS-->
+    <!--LIST OF THE USER'S HABITS AS BUTTONS-->
     <div class="habit_buttons">
         {% for habit in all_user_habits %}
             <button class="habit_btn" data-habit-id="{{ habit.id }}">{{ habit.title }}</button>

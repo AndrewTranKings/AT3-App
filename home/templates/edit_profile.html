@@ -1,0 +1,28 @@
+<!--Implemented edit profile route, helper function, and this html page. Must test it.-->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Edit Profile</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/edit_profile.css') }}">
+</head>
+<body>
+    <div class="edit_profile_container">
+    <h1>Edit Your Profile</h1>
+    <form method="POST" enctype="multipart/form-data">
+        <label>Email:</label>
+        <input type="email" name="email" value="{{ user.email or '' }}"><br>
+
+        <label>Bio:</label>
+        <textarea name="bio">{{ user.bio or '' }}</textarea><br>
+
+        <label>Profile Picture:</label>
+        <input type="file" name="profile_pic"><br>
+
+        <button type="submit">Save Changes</button>
+    </form>
+    <a href="{{ url_for('profile') }}" class="cancel_link">Cancel</a>
+    </div>
+</body>
+</html>

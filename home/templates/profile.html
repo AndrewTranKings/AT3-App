@@ -27,11 +27,13 @@
     </nav>
     <!-- Profile Section -->
     <div class="profile-container">
-        <img src="{{ url_for('static', filename='images/DefaultProfilePic.png') }}" alt="Profile Picture" class="profile-pic">
+        <img src="{{ url_for('static', filename=user.profile_pic) if user.profile_pic else url_for('static', filename='images/DefaultProfilePic.png') }}" alt="Profile Picture" class="profile-pic">
         <h2 class="username">{{user.username}}</h2>
-        <p class="email">johndoe@example.com</p>
-        <p class="bio">Hi, I'm John! I use this app to track my habits and stay productive.</p>
-        <button class="edit-button">Edit Profile</button>
+        <p class="email">{{user.email or 'No Email Set'}}</p>
+        <p class="bio">{{user.bio or 'No Bio Set'}}</p>
+        <a href="{{ url_for('edit_profile') }}">
+            <button class="edit-button">Edit Profile</button>
+        </a>
     </div>
 </body>
 </html>

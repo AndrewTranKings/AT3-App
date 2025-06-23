@@ -7,13 +7,16 @@ class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(100), nullable=False, unique=True)
     password = db.Column(db.String(100), nullable=False)
+    email = db.Column(db.String(100), unique=True, nullable=True)
+    bio = db.Column(db.Text, nullable=True)
+    profile_pic = db.Column(db.String(200), nullable=True) #String stores path to image
     habits = db.relationship('Habit', backref='user', lazy=True)
 
     def __init__(self, username, password):
         self.username = username
         self.password = password
 
-class Habit(db.Model): #Need to fix user_id when creating new habit
+class Habit(db.Model):
     id = db.Column(db.Integer, primary_key = True)
     title = db.Column(db.String(100), nullable=False)
     category = db.Column(db.String(100), nullable=False)
@@ -33,7 +36,4 @@ class HabitLog(db.Model):
     def _init__(self, date, habit_id):
         self.date = date
         self.habit_id = habit_id
-
-
-
 

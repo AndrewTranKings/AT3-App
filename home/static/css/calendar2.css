@@ -209,7 +209,8 @@ ul li:hover ul.dropdown {
     cursor: pointer;
 }
 
-.habit_btn.active {
-    background-color: #007BFF;
+
+.habit_btn.selected {
+    background-color: cornflowerblue;
     color: white;
 }
