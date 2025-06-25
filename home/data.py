@@ -21,7 +21,7 @@ class Habit(db.Model):
     title = db.Column(db.String(100), nullable=False)
     category = db.Column(db.String(100), nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable = False)
-    logs = db.relationship('HabitLog', backref='habit', lazy=True)
+    logs = db.relationship('HabitLog', backref='habit', lazy=True, cascade='all, delete-orphan')
 
     def __init__(self, title, category, user_id):
         self.title = title

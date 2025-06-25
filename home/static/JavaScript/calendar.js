@@ -22,8 +22,12 @@ habitTitle.onclick = function () {
     }
 };
 
-var daysInTheMonthList = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
-var daysInThisMonth = daysInTheMonthList[currentMonth];
+function getDaysInMonth(month, year) {
+    return new Date(year, month + 1, 0).getDate();
+
+}
+var daysInThisMonth = getDaysInMonth(currentMonth, currentYear);
+document.getElementById("daysInMonth").textContent = daysInThisMonth;
 var daysCompleted = 0;
 var totalDays = document.getElementById("totalDays");
 
@@ -54,9 +58,14 @@ for (var i = 0; i < days.length; i++) {
 
 /*UPDATE CALENDAR DEPENDING ON SELECTED HABIT*/
 function updateCalendarForSelectedHabit() { //Helper function
-    if (!selectedHabitId) return;
+    daysInThisMonth = getDaysInMonth(currentMonth, currentYear);
     daysCompleted = 0;
 
+    if (!selectedHabitId) {
+        totalDays.innerHTML = `0/${daysInThisMonth}`; //Calculate correct days in the month
+        return;
+    }
+    
     fetch(`/get_habit_logs?habit_id=${selectedHabitId}&month=${currentMonth + 1}&year=${currentYear}`) // ✅ NEW
         .then(response => response.json())
         .then(logs => {
@@ -153,7 +162,7 @@ resetButton.onclick = function () {
             if (curDay) curDay.style.backgroundColor = "white";
         }
         daysCompleted = 0;
-        totalDays.innerHTML = daysCompleted + "/" + daysInThisMonth;
+        totalDays.innerHTML = `${daysCompleted}/${daysInThisMonth}`;
         console.log("Logs reset for habit:", selectedHabitId);
     })
     .catch(err => {
@@ -173,5 +182,20 @@ habitButtons.forEach(button => {
         /*HELPS WITH CSS FOR HIGHLIGHTING SELECTED HABIT*/
         habitButtons.forEach(btn => btn.classList.remove('selected')); //Removes highlight from each button
         button.classList.add('selected'); //Only highlights the selected habit
+    });
+});
+
+//ONLY ALLOW EDIT AND DELETE ONCE HABIT IS SELECTED
+document.querySelectorAll('.habit_btn').forEach(button => {
+    button.addEventListener('click', function () {
+        selectedHabitId = this.getAttribute('data-habit-id');
+
+        // Enable buttons
+        document.querySelector('.edit_habit_btn').disabled = false;
+        document.querySelector('.delete_habit_btn').disabled = false;
+
+        // Update form actions
+        document.getElementById('editHabitForm').action = `/edit_habit/${selectedHabitId}`;
+        document.getElementById('deleteHabitForm').action = `/delete_habit/${selectedHabitId}`;
     });
 });

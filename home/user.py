@@ -38,3 +38,5 @@ def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 #MUST ADD A VISUAL ALERT FOR USER TO KNOW FILE TYPE IS INCORRECT
+#Sort out calendar bug where no habit selected displays 31 days
+#Work on shop or community

@@ -1,7 +1,7 @@
 from flask import Flask, render_template, url_for, redirect, request, jsonify, session
 from data import db, User, Habit, HabitLog
 from user import create_new_user, update_user_profile
-from habit import create_new_habit
+from habit import create_new_habit, edit_a_habit, delete_a_habit
 import os
 from datetime import datetime
 
@@ -109,6 +109,32 @@ def create_habit():
         create_new_habit(title_input, category_input, user_id_input)
         return redirect(url_for('calendar'))
     
+@app.route('/edit_habit/<int:habit_id>', methods=['GET', 'POST'])
+def edit_habit(habit_id):
+    habit = Habit.query.get(habit_id)
+    if not habit:
+        return "Habit not found", 404
+    
+    if request.method == 'POST':
+        title_input = request.form.get('title')
+        category_input = request.form.get('category')
+        edit_a_habit(habit_id, title_input, category_input)
+        return redirect(url_for('calendar'))
+
+    return render_template('edit_habit.html', habit=habit)   
+
+@app.route('/delete_habit/<int:habit_id>', methods=['POST'])
+def delete_habit(habit_id):
+    #Only logged in user can delete their habit
+    user_id = session.get('user_id')
+    if not user_id:
+        return redirect(url_for('login'))
+    
+    success = delete_a_habit(habit_id)
+    if not success:
+        return "Habit not found", 404
+    return redirect(url_for('calendar'))
+
 @app.route('/log_habit', methods=['POST'])
 def log_habit():
     data = request.get_json()

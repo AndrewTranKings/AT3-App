@@ -41,7 +41,7 @@
         <div id="calendarDiv">
             <div id="calendarHeading">
                 <p id="habitTitle">My New Habit</p>
-                <p id="totalDays">0/31</p>
+                <p id="totalDays">0/<span id="daysInMonth"></span></p>
             </div>
             <div id="calendarContent">
                 <div id="tracker">
@@ -94,9 +94,21 @@
             </div>
         </div>
      </div>
+
+     <!--CREATE, EDIT, AND DELETE BUTTONS-->
+     <div class = "habit_action_buttons">
      <form action="{{ url_for('create_habit') }}" method="get">
         <button type="submit" class="create_habit_btn">Create Habit</button>
     </form>
+
+    <form id="editHabitForm" method="get" style="display: inline;">
+        <button type="submit" class="edit_habit_btn" disabled>Edit Habit</button>
+    </form>
+
+    <form id="deleteHabitForm" method="post" style="display: inline;">
+        <button type="submit" class="delete_habit_btn" disabled onclick="return confirm('Are you sure you want to delete this habit?')">Delete Habit</button>
+    </form>
+     </div>
      <button id="resetButton">Reset Button</button>
 
      <!--SHOW ALL USERS THAT HAVE SIGNED UP (for testing purposes, this will be removed later)-->

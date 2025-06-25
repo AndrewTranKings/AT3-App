@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Habit</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/edit_habit.css') }}">
+</head>
+<body>
+    <h1>Edit Habit</h1>
+    <form method="POST">
+    <label for="title">New Title:</label>
+    <input type="text" name="title" id="title" value="{{ habit.title }}"><br><br>
+
+    <label for="category">New Category:</label>
+    <select name="category" id="category">
+            <option value="">-- Keep Current --</option>
+            <option value="Health" {% if habit.category == 'Health' %}selected{% endif %}>Health</option>
+            <option value="Fitness" {% if habit.category == 'Fitness' %}selected{% endif %}>Fitness</option>
+            <option value="Productivity" {% if habit.category == 'Productivity' %}selected{% endif %}>Productivity</option>
+            <option value="Mindfulness" {% if habit.category == 'Mindfulness' %}selected{% endif %}>Mindfulness</option>
+            <option value="Other" {% if habit.category == 'Other' %}selected{% endif %}>Other</option>
+        </select><br><br>
+
+    <button type="submit">Save Changes</button>
+    <a href="{{ url_for('calendar') }}"><button type="button">Cancel</button></a>
+</form>
+    
+</body>
+</html>

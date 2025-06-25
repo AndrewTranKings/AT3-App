@@ -168,7 +168,7 @@ ul li:hover ul.dropdown {
     display: block;
 }
 
-/*Create Habit Button section*/
+/*CREATE HABIT BUTTON SECTION*/
 .create_habit_btn {
     background-color: #4a90e2; /* cornflower blue */
     color: white;
@@ -191,6 +191,74 @@ ul li:hover ul.dropdown {
 
 .create_habit_btn:active {
     transform: scale(0.98);
+}
+
+/*EDIT HABIT BUTTON SECTION*/
+.edit_habit_btn {
+    background-color: green;
+    color: white;
+    padding: 12px 24px;
+    border: none;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    margin: 20px auto;
+    display: block;
+}
+
+.edit_habit_btn:not(:disabled):hover {
+    background-color: rgb(0, 118, 0); /* slightly darker green */
+    transform: translateY(-2px);
+}
+
+.edit_habit_btn:active {
+    transform: scale(0.98);
+}
+
+/*DELETE HABIT BUTTON SECTION*/
+.delete_habit_btn {
+    background-color: red;
+    color: white;
+    padding: 12px 24px;
+    border: none;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    margin: 20px auto;
+    display: block;
+}
+
+.delete_habit_btn:not(:disabled):hover {
+    background-color: rgb(216, 0, 0); /* slightly darker red */
+    transform: translateY(-2px);
+}
+
+.delete_habit_btn:active {
+    transform: scale(0.98);
+}
+
+/*ALL THE HABIT ACTION BUTTONS*/
+.habit_action_buttons {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.habit_action_buttons form {
+    margin: 0;
+}
+
+/*EDIT AND DELETE WHEN NO HABIT IS SELECTED*/
+button:disabled {
+    background-color: #aaa;
+    cursor: not-allowed;
 }
 
 /*Habit buttons at the top of calendar*/
