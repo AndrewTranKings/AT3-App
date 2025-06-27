@@ -1,13 +1,25 @@
-from data import db, User
+from data import db, User, Category, UserCategoryProgress
 import uuid
 import os
 from werkzeug.utils import secure_filename
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'} #only file types allowed for pfp
 
+def initialise_user_category_progress(user_id):
+    categories = Category.query.all()
+    for category in categories:
+        # Check if user already has progress record for category
+        existing = UserCategoryProgress.query.filter_by(user_id=user_id, category_id=category.id).first()
+        if not existing:
+            progress = UserCategoryProgress(user_id=user_id, category_id=category.id)
+            db.session.add(progress)
+    db.session.commit()
+
 def create_new_user(username_input, password_input):
     new_user = User(username=username_input, password=password_input)
     db.session.add(new_user)
     db.session.commit()
+
+    initialise_user_category_progress(new_user.id)
     return new_user
 
 def update_user_profile(user_id, email_input, bio_input, pfp_input, upload_folder):

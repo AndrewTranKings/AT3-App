@@ -1,16 +1,24 @@
 from flask import Flask, render_template, url_for, redirect, request, jsonify, session
-from data import db, User, Habit, HabitLog
-from user import create_new_user, update_user_profile
+from data import db, User, Habit, HabitLog, Category
+from user import create_new_user, update_user_profile, initialise_user_category_progress
 from habit import create_new_habit, edit_a_habit, delete_a_habit
 import os
 from datetime import datetime
 
 app = Flask(__name__)
 app.secret_key = os.urandom(24) #Generate a random session key
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///app_database_test.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///app_database_new.db'
 upload_folder = app.config['UPLOAD_FOLDER'] = os.path.join('home', 'static', 'Images', 'profile_pics') #Folder for uploaded profile pictures
 app.config['MAX_CONTENT_LENGTH'] = 2 * 1024 * 1024  # 2MB limit
 db.init_app(app)
+
+#Helper function for creating habits off app start
+def seed_categories():
+    if Category.query.count() == 0:
+        default_categories = ['Health', 'Fitness', 'Productivity', 'Learning', 'Spirituality', 'Creativity']
+        for name in default_categories:
+            db.session.add(Category(name=name))
+        db.session.commit()
 
 
 @app.route('/', methods=['GET'])
@@ -85,6 +93,7 @@ def signup(): #The same as the login route without verification as the user is c
 
         new_user = create_new_user(username_input, password_input)
         session['user_id'] = new_user.id #Automatically logs in new account
+        initialise_user_category_progress(new_user.id) #Create the progress bar per category
 
         return redirect(url_for('calendar'))
     
@@ -96,7 +105,8 @@ def signout():
 @app.route('/create_habit', methods=['GET', 'POST'])
 def create_habit():
     if request.method == 'GET':
-        return render_template('create_habit.html')
+        all_categories = Category.query.all()
+        return render_template('create_habit.html', categories=all_categories)
     elif request.method == 'POST':
         user_id = session.get('user_id') #Check for a valid session first
         if not user_id:
@@ -104,9 +114,9 @@ def create_habit():
         
         #Get data from create_habit.html
         title_input = request.form.get('title')
-        category_input = request.form.get('category')
+        category_id_input = int(request.form.get('category_id'))
         user_id_input = user_id #Take the user_id directly from the session
-        create_new_habit(title_input, category_input, user_id_input)
+        create_new_habit(title_input, category_id_input, user_id_input)
         return redirect(url_for('calendar'))
     
 @app.route('/edit_habit/<int:habit_id>', methods=['GET', 'POST'])
@@ -115,13 +125,15 @@ def edit_habit(habit_id):
     if not habit:
         return "Habit not found", 404
     
+    all_categories = Category.query.all()
+    
     if request.method == 'POST':
         title_input = request.form.get('title')
-        category_input = request.form.get('category')
-        edit_a_habit(habit_id, title_input, category_input)
+        category_id_input = int(request.form.get('category_id'))
+        edit_a_habit(habit_id, title_input, category_id_input)
         return redirect(url_for('calendar'))
 
-    return render_template('edit_habit.html', habit=habit)   
+    return render_template('edit_habit.html', habit=habit, categories=all_categories)   
 
 @app.route('/delete_habit/<int:habit_id>', methods=['POST'])
 def delete_habit(habit_id):
@@ -191,5 +203,6 @@ def reset_habit_logs():
 if __name__ == '__main__':
     with app.app_context():
         db.create_all()
+        seed_categories()
     app.run()
 

@@ -13,14 +13,11 @@
       <input type="text" id="title" name="title" required>
 
       <label for="category">Category:</label>
-      <select id="category" name="category" required>
+      <select id="category" name="category_id" required>
         <option value="">-- Select a Category --</option>
-        <option value="Health">Health</option>
-        <option value="Fitness">Fitness</option>
-        <option value="Productivity">Productivity</option>
-        <option value="Learning">Learning</option>
-        <option value="Mindfulness">Mindfulness</option>
-        <option value="Other">Other</option>
+        {% for category in categories %}
+          <option value="{{ category.id }}">{{ category.name }}</option>
+        {% endfor %}
       </select>
 
       <button type="submit">Create Habit</button>
