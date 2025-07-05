@@ -4,6 +4,8 @@ var currentDay = date.getDay();
 var currentDate = date.getDate();
 var currentYear = date.getFullYear();
 var selectedHabitId = null; //Stores the ID of the selected habit
+var selectedCategoryId = null; //Stores the category of the selected habit
+
 
 var months = [
     "January", "February", "March", "April", "May", "June",
@@ -89,6 +91,24 @@ function updateCalendarForSelectedHabit() { //Helper function
         });
 }
 
+/*UPDATE XP BAR TO REFLECT USER'S CURRENT XP PROGRESS*/
+function updateXPBar(categoryData) {
+    document.getElementById("category-name").textContent = categoryData.category_name || "Category";
+    document.getElementById("current-level").textContent = categoryData.level;
+
+    //Use total XP directly from backend
+    var currentXP = categoryData.current_xp;             // e.g. 130 XP total
+    var xpToNextLevel = categoryData.xp_to_next_level;   // e.g. 215 for level 2 → 3
+
+    //PERCENT = totalXP / nextThreshold
+    var percent = (currentXP / xpToNextLevel) * 100;
+    
+    //Update text and bar using total XP value
+    document.getElementById("current-xp").textContent = currentXP;
+    document.getElementById("xp-to-next-level").textContent = xpToNextLevel;
+    document.getElementById("xp-bar-fill").style.width = percent + "%";
+}
+
 /*HANDLE CLICK ON CALENDAR DAYS*/
 var dayDivs = document.querySelectorAll(".day");
 for (let i = 0; i < currentDate; i++) {
@@ -127,6 +147,12 @@ for (let i = 0; i < currentDate; i++) {
         .then(response => response.json())
         .then(data => {
             console.log("Server response:", data);
+            if (selectedCategoryId) {
+                fetch(`/get_category_progress/${selectedCategoryId}`)
+                    .then(res => res.json())
+                    .then(updateXPBar)
+                    .catch(err => console.error("XP fetch failed after log:", err));
+            }
         })
         .catch(err => {
             console.error("Failed to log habit:", err);
@@ -164,6 +190,13 @@ resetButton.onclick = function () {
         daysCompleted = 0;
         totalDays.innerHTML = `${daysCompleted}/${daysInThisMonth}`;
         console.log("Logs reset for habit:", selectedHabitId);
+        
+        // Refresh XP bar
+        if (selectedCategoryId) {
+            fetch(`/get_category_progress/${selectedCategoryId}`)
+                .then(res => res.json())
+                .then(updateXPBar);
+        }
     })
     .catch(err => {
         console.error("Failed to reset logs:", err);
@@ -176,8 +209,18 @@ const habitButtons = document.querySelectorAll('.habit_btn');
 habitButtons.forEach(button => {
     button.addEventListener('click', () => {
         selectedHabitId = button.getAttribute('data-habit-id');
+        selectedCategoryId = button.getAttribute('data-category-id');
         console.log("Selected Habit ID:", selectedHabitId);
+        console.log("Selected Category ID:", selectedCategoryId);
         updateCalendarForSelectedHabit();
+
+        //GET XP BAR FOR THAT HABIT'S CATEGORY
+        if (selectedCategoryId) {
+            fetch(`/get_category_progress/${selectedCategoryId}`)
+                .then(res => res.json())
+                .then(updateXPBar)
+                .catch(err => console.error("Failed to fetch XP progress:", err));
+        }
 
         /*HELPS WITH CSS FOR HIGHLIGHTING SELECTED HABIT*/
         habitButtons.forEach(btn => btn.classList.remove('selected')); //Removes highlight from each button
@@ -189,6 +232,7 @@ habitButtons.forEach(button => {
 document.querySelectorAll('.habit_btn').forEach(button => {
     button.addEventListener('click', function () {
         selectedHabitId = this.getAttribute('data-habit-id');
+        selectedCategoryId = this.getAttribute('data-category-id');
 
         // Enable buttons
         document.querySelector('.edit_habit_btn').disabled = false;

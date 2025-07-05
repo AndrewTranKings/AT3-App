@@ -14,7 +14,44 @@ def initialise_user_category_progress(user_id):
             db.session.add(progress)
     db.session.commit()
 
+def get_xp_threshold(level):
+    if level == 1:
+        return 0
+    return 100 + (level - 2) * 115 # XP needed increases by 15 per level
+
+def add_xp_to_category(user_id, category_id, amount):
+    progress = UserCategoryProgress.query.filter_by(user_id=user_id, category_id=category_id).first()
+
+    if not progress:
+        progress = UserCategoryProgress(user_id=user_id, category_id=category_id, xp=amount)
+        db.session.add(progress)
+    else:
+        progress.xp += amount
+
+    progress.level = calculate_level_from_xp(progress.xp)
+    db.session.commit()
+
+def calculate_level_from_xp(total_xp):
+    level = 1
+    while total_xp >= get_xp_threshold(level + 1):
+        level += 1
+    return level
+
+def remove_xp_from_category(user_id, category_id, xp_amount):
+    progress = UserCategoryProgress.query.filter_by(user_id=user_id, category_id=category_id).first()
+
+    if progress:
+        progress.xp = max(0, progress.xp - xp_amount)
+        progress.level = calculate_level_from_xp(progress.xp)
+        db.session.commit()
+    
+
 def create_new_user(username_input, password_input):
+    # Check if username already exists
+    existing_user = User.query.filter_by(username=username_input).first()
+    if existing_user:
+        return None  # Or raise an exception or handle it however you want
+
     new_user = User(username=username_input, password=password_input)
     db.session.add(new_user)
     db.session.commit()
@@ -50,5 +87,4 @@ def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 #MUST ADD A VISUAL ALERT FOR USER TO KNOW FILE TYPE IS INCORRECT
-#Sort out calendar bug where no habit selected displays 31 days
-#Work on shop or community
+#Fix editing habit category to carry over xp and remove xp from other category

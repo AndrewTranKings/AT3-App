@@ -277,8 +277,58 @@ button:disabled {
     cursor: pointer;
 }
 
-
 .habit_btn.selected {
     background-color: cornflowerblue;
     color: white;
+}
+
+/* XP BAR AREA */
+#xp-bar-container {
+    width: 90%;
+    max-width: 400px;
+    margin: 30px auto;
+    background-color: #f9f9f9;
+    border: 1px solid #ddd;
+    border-radius: 12px;
+    padding: 15px 20px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    text-align: left;
+}
+
+/* XP Title */
+#xp-bar-title {
+    font-size: 1.2rem;
+    color: #333;
+    margin-bottom: 8px;
+}
+
+#category-name {
+    color: #007bff;
+    font-weight: bold;
+    margin-left: 5px;
+}
+
+/* XP Info */
+#xp-info {
+    font-size: 1rem;
+    margin-bottom: 10px;
+    color: #555;
+}
+
+/* XP Bar Background */
+#xp-bar-background {
+    width: 100%;
+    height: 20px;
+    background-color: #e0e0e0;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+/* XP Bar Fill */
+#xp-bar-fill {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(to right, #28a745, #70e000);
+    border-radius: 10px 0 0 10px;
+    transition: width 0.4s ease;
 }

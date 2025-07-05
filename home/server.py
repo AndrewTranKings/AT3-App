@@ -1,13 +1,13 @@
 from flask import Flask, render_template, url_for, redirect, request, jsonify, session
-from data import db, User, Habit, HabitLog, Category
-from user import create_new_user, update_user_profile, initialise_user_category_progress
+from data import db, User, Habit, HabitLog, Category, UserCategoryProgress
+from user import create_new_user, update_user_profile, initialise_user_category_progress, add_xp_to_category, remove_xp_from_category, get_xp_threshold, calculate_level_from_xp
 from habit import create_new_habit, edit_a_habit, delete_a_habit
 import os
 from datetime import datetime
 
 app = Flask(__name__)
 app.secret_key = os.urandom(24) #Generate a random session key
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///app_database_new.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///app_database_trial.db'
 upload_folder = app.config['UPLOAD_FOLDER'] = os.path.join('home', 'static', 'Images', 'profile_pics') #Folder for uploaded profile pictures
 app.config['MAX_CONTENT_LENGTH'] = 2 * 1024 * 1024  # 2MB limit
 db.init_app(app)
@@ -92,6 +92,9 @@ def signup(): #The same as the login route without verification as the user is c
         password_input = request.form.get('password')
 
         new_user = create_new_user(username_input, password_input)
+        if new_user is None:
+            return "Username already taken, please choose another.", 400
+        
         session['user_id'] = new_user.id #Automatically logs in new account
         initialise_user_category_progress(new_user.id) #Create the progress bar per category
 
@@ -142,13 +145,29 @@ def delete_habit(habit_id):
     if not user_id:
         return redirect(url_for('login'))
     
+    habit = Habit.query.get(habit_id)
+    if not habit or habit.user_id != user_id:
+        return "Habit not found or unauthorized", 404
+    
+    #Remove XP per log
+    logs = HabitLog.query.filter_by(habit_id=habit_id).all()
+    xp_to_remove = 25 * len(logs)  # Assumes 10 XP per log
+    category_id = habit.category_id
+
+    #Update UserCategoryProgress when deleting XP
+    progress = UserCategoryProgress.query.filter_by(user_id=user_id, category_id=category_id).first()
+    if progress:
+        progress.xp = max(0, progress.xp - xp_to_remove)
+    
     success = delete_a_habit(habit_id)
     if not success:
         return "Habit not found", 404
+    db.session.commit()
     return redirect(url_for('calendar'))
 
 @app.route('/log_habit', methods=['POST'])
 def log_habit():
+    user_id = session.get('user_id') #Find which account is logged in
     data = request.get_json()
     habit_id = int(data['habit_id'])
     date_str = data['date']  # e.g. '6-10-2025'
@@ -157,13 +176,17 @@ def log_habit():
     date_obj = datetime.strptime(date_str, "%m-%d-%Y").date()
 
     log = HabitLog.query.filter_by(habit_id=habit_id, date=date_obj).first()
+    habit = Habit.query.get(habit_id)
+
     if completed:
         if not log:
             log = HabitLog(habit_id=habit_id, date=date_obj)
             db.session.add(log)
+            add_xp_to_category(user_id, habit.category_id, 25) #Add 10 xp
     else:
         if log:
             db.session.delete(log)
+            remove_xp_from_category(user_id, habit.category_id, 25) #Remove 10 xp
 
     db.session.commit()
     return jsonify({"status": "success"})
@@ -190,14 +213,57 @@ def reset_habit_logs():
     month = int(data['month'])
     year = int(data['year'])
 
-    logs = HabitLog.query.filter_by(habit_id=habit_id).all()
-    for log in logs:
-        if log.date.month == month and log.date.year == year:
-            db.session.delete(log)
+    #Get the habit and validate user
+    user_id = session.get('user_id')
+    habit = Habit.query.get(habit_id)
+    if not habit or habit.user_id != user_id:
+        return jsonify({"error": "Habit not found or unauthorized"}), 403
+
+    #Only fetch logs for that month/year
+    logs_to_delete = HabitLog.query.filter(
+        HabitLog.habit_id == habit_id,
+        db.extract('month', HabitLog.date) == month,
+        db.extract('year', HabitLog.date) == year
+    ).all()
+
+    #Remove 10 XP per log
+    xp_removed = len(logs_to_delete) * 25
+    for log in logs_to_delete:
+        db.session.delete(log)
+
+    #Remove XP from user's progress for that category
+    if xp_removed > 0:
+        remove_xp_from_category(user_id, habit.category_id, xp_removed)
+
     db.session.commit()
 
-    return jsonify({"status": "reset"})
+    #Return informative response
+    return jsonify({
+        "status": "reset_successful",
+        "logs_deleted": len(logs_to_delete),
+        "xp_removed": xp_removed
+    })
 
+@app.route('/get_category_progress/<int:category_id>')
+def get_category_progress(category_id):
+    user_id = session.get('user_id')
+    if not user_id:
+        return redirect(url_for('login'))
+    progress = UserCategoryProgress.query.filter_by(user_id=user_id, category_id=category_id).first()
+    category = Category.query.get(category_id)
+
+    total_xp = progress.xp if progress else 0
+    level = calculate_level_from_xp(total_xp)
+
+    # Cumalitve XP required for the next level
+    xp_to_next_level = get_xp_threshold(level + 1)
+
+    return jsonify({
+        "category_name": category.name if category else "Unknown",
+        "current_xp": total_xp,
+        "xp_to_next_level": xp_to_next_level,
+        "level": level
+    })
 
 
 if __name__ == '__main__':

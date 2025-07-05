@@ -64,10 +64,10 @@ class UserCategoryProgress(db.Model):
     #Ensure one progression bar per category
     __table_args__ = (db.UniqueConstraint('user_id', 'category_id', name='uix_user_category'),)
 
-    def __init__(self, user_id, category_id):
+    def __init__(self, user_id, category_id, xp=0, level=1):
         self.user_id = user_id
         self.category_id = category_id
-        self.xp = 0
-        self.level = 1
+        self.xp = xp
+        self.level = level
 
 

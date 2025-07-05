@@ -24,6 +24,25 @@
         </ul>
     </nav>
 
+    <!-- XP Progress Bar Container -->
+    <div id="xp-bar-container">
+    <!-- Title -->
+    <div id="xp-bar-title">
+        <strong>Category Progress:</strong>
+        <span id="category-name">[Category Name]</span>
+    </div>
+
+    <!-- XP Info -->
+    <div id="xp-info">
+        XP: <span id="current-xp">0</span> / <span id="xp-to-next-level">100</span> |
+        Level: <span id="current-level">1</span>
+    </div>
+
+    <!-- XP Bar -->
+    <div id="xp-bar-background">
+        <div id="xp-bar-fill" style="width: 0%;"></div>
+    </div>
+    </div>
 
     <!-- TITLE AND SUBTITLE-->
     <h1 id = "title">Month</h1>
@@ -32,7 +51,7 @@
     <!--LIST OF THE USER'S HABITS AS BUTTONS-->
     <div class="habit_buttons">
         {% for habit in all_user_habits %}
-            <button class="habit_btn" data-habit-id="{{ habit.id }}">{{ habit.title }}</button>
+            <button class="habit_btn" data-habit-id="{{ habit.id }}" data-category-id="{{ habit.category.id }}">{{ habit.title }}</button>
         {% endfor %}
     </div>
 
