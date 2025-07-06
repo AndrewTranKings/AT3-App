@@ -87,4 +87,4 @@ def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 #MUST ADD A VISUAL ALERT FOR USER TO KNOW FILE TYPE IS INCORRECT
-#Fix editing habit category to carry over xp and remove xp from other category
+#Coins do not add

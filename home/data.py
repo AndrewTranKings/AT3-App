@@ -10,6 +10,7 @@ class User(db.Model):
     email = db.Column(db.String(100), unique=True, nullable=True)
     bio = db.Column(db.Text, nullable=True)
     profile_pic = db.Column(db.String(200), nullable=True) #String stores path to image
+    coins = db.Column(db.Integer, default=0)
     habits = db.relationship('Habit', backref='user', lazy=True)
     #Allows one user to have progress for multiple categories
     category_progress = db.relationship('UserCategoryProgress', back_populates='user', lazy=True)

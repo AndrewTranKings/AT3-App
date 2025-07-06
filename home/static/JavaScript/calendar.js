@@ -14,6 +14,45 @@ var months = [
 
 document.getElementById("title").innerHTML = months[currentMonth];
 
+//GLOW EFFECT FOR COIN INCREASE
+function updateCoinCount(newCoinValue) {
+    const coinCounter = document.querySelector('.coin_counter');
+    const coinSpan = document.getElementById('coin_count');
+
+    if (!coinSpan) return;
+
+    // Get old coin value for comparison
+    const oldValue = parseInt(coinSpan.innerText);
+
+    // Update the coin count text
+    coinSpan.textContent = newCoinValue;
+
+    // Only animate if coins increased
+    if (newCoinValue > oldValue) {
+        // Add glow effect class
+        if (coinCounter) {
+            coinCounter.classList.add('glow');
+
+            // Remove glow class after animation duration (matches CSS duration 1.2s)
+            setTimeout(() => {
+                coinCounter.classList.remove('glow');
+            }, 1200);
+        }
+    }
+}
+
+//DYNAMICALLY UPDATE COIN COUNT ON NAV BAR
+function updateCoinDisplay() {
+    fetch('/get_user_coins')
+        .then(response => response.json())
+        .then(data => {
+            updateCoinCount(data.coins);
+        })
+        .catch(err => {
+            console.error("Failed to update coin display:", err);
+        });
+}
+
 var habitTitle = document.getElementById("habitTitle");
 habitTitle.onclick = function () {
     let habits = prompt("What's your habit", habitTitle.innerHTML);
@@ -153,6 +192,7 @@ for (let i = 0; i < currentDate; i++) {
                     .then(updateXPBar)
                     .catch(err => console.error("XP fetch failed after log:", err));
             }
+            updateCoinDisplay();
         })
         .catch(err => {
             console.error("Failed to log habit:", err);

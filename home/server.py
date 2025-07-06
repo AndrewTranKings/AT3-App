@@ -4,10 +4,11 @@ from user import create_new_user, update_user_profile, initialise_user_category_
 from habit import create_new_habit, edit_a_habit, delete_a_habit
 import os
 from datetime import datetime
+from constants import XP_PER_LOG, COINS_PER_LEVEL
 
 app = Flask(__name__)
 app.secret_key = os.urandom(24) #Generate a random session key
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///app_database_trial.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///app_database_habits.db'
 upload_folder = app.config['UPLOAD_FOLDER'] = os.path.join('home', 'static', 'Images', 'profile_pics') #Folder for uploaded profile pictures
 app.config['MAX_CONTENT_LENGTH'] = 2 * 1024 * 1024  # 2MB limit
 db.init_app(app)
@@ -20,6 +21,21 @@ def seed_categories():
             db.session.add(Category(name=name))
         db.session.commit()
 
+@app.context_processor
+def inject_user_data():
+    user_id = session.get('user_id')
+    if user_id:
+        user = User.query.get(user_id)
+        if user:
+            return {
+                'user_coins': user.coins
+                #Add extra variables here if necessary
+                }
+    return {
+        'user_coins': 0
+        #Same for here too
+        }
+
 
 @app.route('/', methods=['GET'])
 def calendar():
@@ -27,9 +43,17 @@ def calendar():
     if not user_id: #If no accoutn logged in send them to login page
         return redirect(url_for('login'))
     
+    user = User.query.get(user_id)
+    user_coins = user.coins if user else 0
+    
     all_users = User.query.all()
     all_user_habits = Habit.query.filter_by(user_id=user_id).all()
-    return render_template('calendar.html', all_users = all_users, all_user_habits = all_user_habits)
+    return render_template(
+        'calendar.html', 
+        all_users = all_users, 
+        all_user_habits = all_user_habits,
+        user_coins=user_coins
+        )
 
 @app.route('/profile', methods=['GET'])
 def profile():
@@ -133,6 +157,40 @@ def edit_habit(habit_id):
     if request.method == 'POST':
         title_input = request.form.get('title')
         category_id_input = int(request.form.get('category_id'))
+        user_id = session.get('user_id')
+
+        #Check if the category is actually changing
+        old_category_id = habit.category_id
+        new_category_id = category_id_input
+
+        if new_category_id != old_category_id:
+            #Calculate XP to transfer based on how many times habit was logged
+            log_count = HabitLog.query.filter_by(habit_id=habit_id).count()
+            xp_change = log_count * XP_PER_LOG  # XP per log (change as needed)
+
+            #Subtract XP from old category progress
+            old_progress = UserCategoryProgress.query.filter_by(
+                user_id=user_id,
+                category_id=old_category_id
+            ).first()
+            if old_progress:
+                old_progress.xp = max(0, old_progress.xp - xp_change)
+
+            #Add XP to new category progress (create if doesn't exist)
+            new_progress = UserCategoryProgress.query.filter_by(
+                user_id=user_id,
+                category_id=new_category_id
+            ).first()
+            if not new_progress:
+                new_progress = UserCategoryProgress(
+                    user_id=user_id,
+                    category_id=new_category_id,
+                    xp=0
+                )
+                db.session.add(new_progress)
+
+            new_progress.xp += xp_change
+
         edit_a_habit(habit_id, title_input, category_id_input)
         return redirect(url_for('calendar'))
 
@@ -151,7 +209,7 @@ def delete_habit(habit_id):
     
     #Remove XP per log
     logs = HabitLog.query.filter_by(habit_id=habit_id).all()
-    xp_to_remove = 25 * len(logs)  # Assumes 10 XP per log
+    xp_to_remove = XP_PER_LOG * len(logs)  # Assumes 10 XP per log
     category_id = habit.category_id
 
     #Update UserCategoryProgress when deleting XP
@@ -174,7 +232,6 @@ def log_habit():
     completed = data['completed']
 
     date_obj = datetime.strptime(date_str, "%m-%d-%Y").date()
-
     log = HabitLog.query.filter_by(habit_id=habit_id, date=date_obj).first()
     habit = Habit.query.get(habit_id)
 
@@ -182,13 +239,31 @@ def log_habit():
         if not log:
             log = HabitLog(habit_id=habit_id, date=date_obj)
             db.session.add(log)
-            add_xp_to_category(user_id, habit.category_id, 25) #Add 10 xp
+            add_xp_to_category(user_id, habit.category_id, XP_PER_LOG)
     else:
         if log:
             db.session.delete(log)
-            remove_xp_from_category(user_id, habit.category_id, 25) #Remove 10 xp
+            remove_xp_from_category(user_id, habit.category_id, XP_PER_LOG)
 
     db.session.commit()
+
+    #Award coins for levelling up
+    user = User.query.get(user_id)
+    progress = UserCategoryProgress.query.filter_by(user_id=user_id, category_id=habit.category_id).first()
+
+    if progress:
+        total_xp = progress.xp
+        new_level = calculate_level_from_xp(total_xp)
+
+        session_key = f'level_category_{habit.category_id}'
+        previous_level = session.get(session_key, calculate_level_from_xp(total_xp - XP_PER_LOG))
+        if new_level > previous_level:
+            level_diff = new_level - previous_level
+            coins_earned = level_diff * COINS_PER_LEVEL
+            user.coins += coins_earned
+            db.session.commit()
+            session[session_key] = new_level  # Prevent duplicate rewards
+
     return jsonify({"status": "success"})
 
 @app.route('/get_habit_logs')
@@ -226,8 +301,8 @@ def reset_habit_logs():
         db.extract('year', HabitLog.date) == year
     ).all()
 
-    #Remove 10 XP per log
-    xp_removed = len(logs_to_delete) * 25
+    #Remove XP per log
+    xp_removed = len(logs_to_delete) * XP_PER_LOG
     for log in logs_to_delete:
         db.session.delete(log)
 
@@ -264,6 +339,14 @@ def get_category_progress(category_id):
         "xp_to_next_level": xp_to_next_level,
         "level": level
     })
+
+@app.route('/get_user_coins')
+def get_user_coins():
+    user_id = session.get('user_id')
+    if not user_id:
+        return jsonify({"coins": 0})
+    user = User.query.get(user_id)
+    return jsonify({"coins": user.coins})
 
 
 if __name__ == '__main__':
