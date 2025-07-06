@@ -71,4 +71,15 @@ class UserCategoryProgress(db.Model):
         self.xp = xp
         self.level = level
 
+class UserInventory(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    item_id = db.Column(db.Integer, db.ForeignKey('shop_item.id'), nullable=False)
 
+class ShopItem(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False)
+    description = db.Column(db.Text)
+    price = db.Column(db.Integer, nullable=False)
+    category_id = db.Column(db.Integer, db.ForeignKey('category.id'), nullable=False)
+    required_level = db.Column(db.Integer, nullable=False)

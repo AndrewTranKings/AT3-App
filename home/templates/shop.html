@@ -4,8 +4,24 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Shop</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/shop.css') }}">
+
 </head>
 <body>
-    
+    <h2>🛒 Shop</h2>
+    <p>You have <strong>{{ user_coins }}</strong> coins.</p>
+
+    <div class="shop_grid">
+    {% for item in items %}
+        <div class="shop_item">
+        <h3>{{ item.name }}</h3>
+        <p>{{ item.description }}</p>
+        <p>Price: 💰{{ item.price }}</p>
+        <form method="POST" action="/buy_item/{{ item.id }}">
+            <button type="submit">Buy</button>
+        </form>
+        </div>
+    {% endfor %}
+    </div>
 </body>
 </html>

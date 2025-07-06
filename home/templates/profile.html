@@ -35,5 +35,22 @@
             <button class="edit-button">Edit Profile</button>
         </a>
     </div>
+
+    <!-- User's Inventory -->
+    <div class="purchased-items">
+        <h3>Purchased Items</h3>
+        {% if purchased_items %}
+            <ul>
+                {% for item in purchased_items %}
+                    <li>
+                        <strong>{{ item.name }}</strong> — {{ item.description }} (💰{{ item.price }})
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p>You haven't bought anything yet.</p>
+        {% endif %}
+    </div>
+
 </body>
 </html>

@@ -102,3 +102,28 @@ ul li a:hover { /*when mouse hovers over drop down*/
 ul li:hover ul.dropdown {
     display: block;
 }
+
+/*User's Invetory Section*/
+.purchased-items {
+    margin: 30px auto;
+    padding: 20px;
+    max-width: 600px;
+    background-color: #f0f8ff;
+    border: 2px solid cornflowerblue;
+    border-radius: 10px;
+}
+
+.purchased-items h3 {
+    color: cornflowerblue;
+    margin-bottom: 10px;
+}
+
+.purchased-items ul {
+    list-style-type: none;
+    padding-left: 0;
+}
+
+.purchased-items li {
+    padding: 8px 0;
+    border-bottom: 1px solid #ddd;
+}

@@ -1,5 +1,5 @@
 from flask import Flask, render_template, url_for, redirect, request, jsonify, session
-from data import db, User, Habit, HabitLog, Category, UserCategoryProgress
+from data import db, User, Habit, HabitLog, Category, UserCategoryProgress, ShopItem, UserInventory
 from user import create_new_user, update_user_profile, initialise_user_category_progress, add_xp_to_category, remove_xp_from_category, get_xp_threshold, calculate_level_from_xp
 from habit import create_new_habit, edit_a_habit, delete_a_habit
 import os
@@ -8,7 +8,7 @@ from constants import XP_PER_LOG, COINS_PER_LEVEL
 
 app = Flask(__name__)
 app.secret_key = os.urandom(24) #Generate a random session key
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///app_database_habits.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///app_database_tests.db'
 upload_folder = app.config['UPLOAD_FOLDER'] = os.path.join('home', 'static', 'Images', 'profile_pics') #Folder for uploaded profile pictures
 app.config['MAX_CONTENT_LENGTH'] = 2 * 1024 * 1024  # 2MB limit
 db.init_app(app)
@@ -20,6 +20,59 @@ def seed_categories():
         for name in default_categories:
             db.session.add(Category(name=name))
         db.session.commit()
+
+def seed_shop_items():
+    test_items = [
+        ShopItem(
+            name="Basic Dumbbells",
+            description="A starter set of dumbbells to build strength.",
+            price=25,
+            category_id=1,  # Health
+            required_level=1
+        ),
+        ShopItem(
+            name="Pro Yoga Mat",
+            description="Perfect for intense yoga sessions.",
+            price=40,
+            category_id=1,  # Health
+            required_level=2
+        ),
+        ShopItem(
+            name="Running Shoes",
+            description="Boost your running efficiency.",
+            price=60,
+            category_id=1,  # Health
+            required_level=3
+        ),
+        ShopItem(
+            name="Beginner Spellbook",
+            description="Casts basic spells for entry-level mages.",
+            price=30,
+            category_id=2,  # Fitness
+            required_level=1
+        ),
+        ShopItem(
+            name="Wizard Hat",
+            description="Increases your magical charisma.",
+            price=50,
+            category_id=2,  # Fitness
+            required_level=2
+        ),
+        ShopItem(
+            name="Advanced Spellbook",
+            description="Grants access to powerful enchantments.",
+            price=80,
+            category_id=2,  # Fitness
+            required_level=3
+        )
+    ]
+
+    # Insert items into database
+    for item in test_items:
+        db.session.add(item)
+
+    db.session.commit()
+    print("✅ Seeded test shop items successfully.")
 
 @app.context_processor
 def inject_user_data():
@@ -63,7 +116,8 @@ def profile():
         return redirect(url_for('login'))
     
     user = User.query.get(user_id)
-    return render_template('profile.html', user=user)
+    purchased_items = db.session.query(ShopItem).join(UserInventory).filter(UserInventory.user_id == user.id).all()
+    return render_template('profile.html', user=user, purchased_items=purchased_items)
 
 @app.route('/edit_profile', methods=['GET', 'POST'])
 def edit_profile():
@@ -87,9 +141,58 @@ def edit_profile():
 def community():
     return render_template('community.html')
 
+# routes.py
 @app.route('/shop')
 def shop():
-    return render_template('shop.html')
+    #Session management
+    user_id = session.get('user_id')
+    if not user_id:
+        return redirect(url_for('login'))
+    user = User.query.get(user_id)
+    
+    # Get user's levels in each category
+    category_progress = db.session.query(
+        UserCategoryProgress.category_id,
+        UserCategoryProgress.level
+    ).filter_by(user_id=user_id).all()
+    category_level_map = {c.category_id: c.level for c in category_progress}
+
+    # Get all shop items the user can afford AND has unlocked
+    items = ShopItem.query.all()
+    unlocked_items = [
+        item for item in items
+        if category_level_map.get(item.category_id, 0) >= item.required_level
+    ]
+
+    return render_template('shop.html', items=unlocked_items, user_coins=user.coins)
+
+@app.route('/buy_item/<int:item_id>', methods=['POST'])
+def buy_item(item_id):    
+    #Session management
+    user_id = session.get('user_id')
+    if not user_id:
+        return redirect(url_for('login'))
+    user = User.query.get(user_id)
+    
+    if request.method == 'POST':
+        item = ShopItem.query.get_or_404(item_id)
+
+        # Check user's level in the item's category
+        progress = UserCategoryProgress.query.filter_by(
+            user_id=user_id,
+            category_id=item.category_id
+        ).first()
+
+        if not progress or progress.level < item.required_level:
+            return jsonify({"success": False, "message": "Level too low."}), 403
+
+        if user.coins < item.price:
+            return jsonify({"success": False, "message": "Not enough coins."}), 403
+
+        user.coins -= item.price
+        db.session.add(UserInventory(user_id=user_id, item_id=item.id))
+        db.session.commit()
+        return jsonify({"success": True})
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -353,5 +456,6 @@ if __name__ == '__main__':
     with app.app_context():
         db.create_all()
         seed_categories()
+        #seed_shop_items()
     app.run()
 
