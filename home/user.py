@@ -87,4 +87,8 @@ def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 #MUST ADD A VISUAL ALERT FOR USER TO KNOW FILE TYPE IS INCORRECT
-#Coins do not add
+#Make other effect types
+#Create a page for post-purchase of an item
+#CSS for active effects
+#Either every item has an effect or type none items have no 'use' button
+#Store how much xp was awarded for a log and then use it for fair xp removal (leave this last, not essential)

@@ -1,5 +1,5 @@
 from flask_sqlalchemy import SQLAlchemy
-from datetime import date
+from datetime import date, datetime, timedelta
 
 db = SQLAlchemy()
 
@@ -75,6 +75,8 @@ class UserInventory(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     item_id = db.Column(db.Integer, db.ForeignKey('shop_item.id'), nullable=False)
+    quantity = db.Column(db.Integer, default=1)
+    shop_item = db.relationship("ShopItem")
 
 class ShopItem(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -83,3 +85,19 @@ class ShopItem(db.Model):
     price = db.Column(db.Integer, nullable=False)
     category_id = db.Column(db.Integer, db.ForeignKey('category.id'), nullable=False)
     required_level = db.Column(db.Integer, nullable=False)
+
+    #Effects allow items to have in-game impact
+    effect_type = db.Column(db.String(50)) # e.g. 'xp_boost', 'coin_multiplier'
+    effect_value = db.Column(db.Float) # e.g. 0.15 for 15%
+    effect_duration_hours = db.Column(db.Integer) #e.g. 24 for 24 hours
+
+class ActiveEffect(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    item_id = db.Column(db.Integer, db.ForeignKey('shop_item.id'), nullable=False)
+    effect_type = db.Column(db.String(50), nullable=False)
+    effect_value = db.Column(db.Float, nullable=False)
+    expires_at = db.Column(db.DateTime, nullable=False)
+
+    user = db.relationship("User", backref="active_effects")
+    item = db.relationship("ShopItem")

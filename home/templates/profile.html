@@ -43,12 +43,29 @@
             <ul>
                 {% for item in purchased_items %}
                     <li>
-                        <strong>{{ item.name }}</strong> — {{ item.description }} (💰{{ item.price }})
+                        <strong>{{ item.shop_item.name }}</strong> — {{ item.shop_item.description }} 
+                        (💰{{ item.shop_item.price }} | {{ item.quantity }})
+                        <form method="POST" action="{{ url_for('use_item', item_id=item.shop_item.id) }}">
+                            <button type="submit">Use</button>
+                        </form>
                     </li>
                 {% endfor %}
             </ul>
         {% else %}
             <p>You haven't bought anything yet.</p>
+        {% endif %}
+    </div>
+
+    <div class="active-effects">
+        <h3>Active Effects</h3>
+        {% if active_effects %}
+            <ul>
+            {% for effect in active_effects %}
+                <li>{{ effect.effect_type }} +{{ effect.effect_value * 100 }}% until {{ effect.expires_at.strftime('%Y-%m-%d %H:%M') }}</li>
+            {% endfor %}
+            </ul>
+        {% else %}
+            <p>No active effects</p>
         {% endif %}
     </div>
 

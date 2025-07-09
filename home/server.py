@@ -1,14 +1,15 @@
-from flask import Flask, render_template, url_for, redirect, request, jsonify, session
-from data import db, User, Habit, HabitLog, Category, UserCategoryProgress, ShopItem, UserInventory
+from flask import Flask, render_template, url_for, redirect, request, jsonify, session, flash
+from data import db, User, Habit, HabitLog, Category, UserCategoryProgress, ShopItem, UserInventory, ActiveEffect
 from user import create_new_user, update_user_profile, initialise_user_category_progress, add_xp_to_category, remove_xp_from_category, get_xp_threshold, calculate_level_from_xp
 from habit import create_new_habit, edit_a_habit, delete_a_habit
+from active_effect import apply_effect
 import os
-from datetime import datetime
+from datetime import datetime, timedelta
 from constants import XP_PER_LOG, COINS_PER_LEVEL
 
 app = Flask(__name__)
 app.secret_key = os.urandom(24) #Generate a random session key
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///app_database_tests.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///app_database_habits.db'
 upload_folder = app.config['UPLOAD_FOLDER'] = os.path.join('home', 'static', 'Images', 'profile_pics') #Folder for uploaded profile pictures
 app.config['MAX_CONTENT_LENGTH'] = 2 * 1024 * 1024  # 2MB limit
 db.init_app(app)
@@ -23,49 +24,88 @@ def seed_categories():
 
 def seed_shop_items():
     test_items = [
-        ShopItem(
-            name="Basic Dumbbells",
-            description="A starter set of dumbbells to build strength.",
-            price=25,
-            category_id=1,  # Health
-            required_level=1
-        ),
-        ShopItem(
-            name="Pro Yoga Mat",
-            description="Perfect for intense yoga sessions.",
-            price=40,
-            category_id=1,  # Health
-            required_level=2
-        ),
-        ShopItem(
-            name="Running Shoes",
-            description="Boost your running efficiency.",
-            price=60,
-            category_id=1,  # Health
-            required_level=3
-        ),
-        ShopItem(
-            name="Beginner Spellbook",
-            description="Casts basic spells for entry-level mages.",
-            price=30,
-            category_id=2,  # Fitness
-            required_level=1
-        ),
-        ShopItem(
-            name="Wizard Hat",
-            description="Increases your magical charisma.",
-            price=50,
-            category_id=2,  # Fitness
-            required_level=2
-        ),
-        ShopItem(
-            name="Advanced Spellbook",
-            description="Grants access to powerful enchantments.",
-            price=80,
-            category_id=2,  # Fitness
-            required_level=3
-        )
-    ]
+    ShopItem(
+        name="Basic Dumbbells",
+        description="A starter set of dumbbells to build strength.",
+        price=25,
+        category_id=1,
+        required_level=1,
+        effect_type=None,
+        effect_value=None,
+        effect_duration_hours=None
+    ),
+    ShopItem(
+        name="Pro Yoga Mat",
+        description="Perfect for intense yoga sessions.",
+        price=40,
+        category_id=1,
+        required_level=2,
+        effect_type=None,
+        effect_value=None,
+        effect_duration_hours=None
+    ),
+    ShopItem(
+        name="Running Shoes",
+        description="Boosts XP gain by 10% for 6 hours after a workout.",
+        price=60,
+        category_id=1,
+        required_level=3,
+        effect_type="xp_boost",
+        effect_value=0.10,
+        effect_duration_hours=6
+    ),
+    ShopItem(
+        name="Golden Water Bottle",
+        description="Multiplies coin rewards by 25% for 4 hours.",
+        price=75,
+        category_id=1,
+        required_level=4,
+        effect_type="coin_multiplier",
+        effect_value=0.25,
+        effect_duration_hours=4
+    ),
+
+    ShopItem(
+        name="Beginner Spellbook",
+        description="Casts basic spells for entry-level mages.",
+        price=30,
+        category_id=2,
+        required_level=1,
+        effect_type=None,
+        effect_value=None,
+        effect_duration_hours=None
+    ),
+    ShopItem(
+        name="Wizard Hat",
+        description="Grants 15% extra XP for 12 hours due to increased magical focus.",
+        price=50,
+        category_id=2,
+        required_level=2,
+        effect_type="xp_boost",
+        effect_value=0.15,
+        effect_duration_hours=12
+    ),
+    ShopItem(
+        name="Advanced Spellbook",
+        description="Doubles XP for 1 hour — but use it wisely!",
+        price=80,
+        category_id=2,
+        required_level=3,
+        effect_type="xp_boost",
+        effect_value=1.0,
+        effect_duration_hours=1
+    ),
+    ShopItem(
+        name="Lucky Wand",
+        description="Coin rewards are boosted by 50% for 2 hours.",
+        price=90,
+        category_id=2,
+        required_level=4,
+        effect_type="coin_multiplier",
+        effect_value=0.5,
+        effect_duration_hours=2
+    )
+]
 
     # Insert items into database
     for item in test_items:
@@ -114,10 +154,17 @@ def profile():
     user_id = session.get('user_id')
     if not user_id:
         return redirect(url_for('login'))
-    
     user = User.query.get(user_id)
-    purchased_items = db.session.query(ShopItem).join(UserInventory).filter(UserInventory.user_id == user.id).all()
-    return render_template('profile.html', user=user, purchased_items=purchased_items)
+
+    purchased_items = UserInventory.query.filter_by(user_id=user_id).all()
+    active_effects = ActiveEffect.query.filter_by(user_id=user_id).filter(ActiveEffect.expires_at > datetime.utcnow()).all()
+
+    return render_template(
+        'profile.html', 
+        user=user, 
+        purchased_items=purchased_items,
+        active_effects=active_effects
+        )
 
 @app.route('/edit_profile', methods=['GET', 'POST'])
 def edit_profile():
@@ -141,7 +188,6 @@ def edit_profile():
 def community():
     return render_template('community.html')
 
-# routes.py
 @app.route('/shop')
 def shop():
     #Session management
@@ -188,11 +234,59 @@ def buy_item(item_id):
 
         if user.coins < item.price:
             return jsonify({"success": False, "message": "Not enough coins."}), 403
-
         user.coins -= item.price
-        db.session.add(UserInventory(user_id=user_id, item_id=item.id))
+
+        # Check if user already has this item in inventory
+        inventory_entry = UserInventory.query.filter_by(user_id=user_id, item_id=item_id).first()
+        if inventory_entry:
+            # If user already owns item increase quantity by one
+            inventory_entry.quantity += 1
+        else:
+            # If not already owned add item to inventory
+            inventory_entry = UserInventory(user_id=user_id, item_id=item_id, quantity=1)
+            db.session.add(inventory_entry)
+        
         db.session.commit()
         return jsonify({"success": True})
+    
+@app.route('/use_item/<int:item_id>', methods=['POST'])
+def use_item(item_id):
+    #Session management
+    user_id = session.get('user_id')
+    if not user_id:
+        return redirect(url_for('login'))
+
+    # Find item in user's inventory
+    inventory_entry = UserInventory.query.filter_by(user_id=user_id, item_id=item_id).first()
+    if not inventory_entry:
+        flash("You don't own this item.")
+        return redirect(url_for('profile'))
+
+    item = ShopItem.query.get(item_id)
+
+    # Check if item has effect fields
+    if item.effect_type and item.effect_value and item.effect_duration_hours:
+        expires_at = datetime.utcnow() + timedelta(hours=item.effect_duration_hours)
+        effect = ActiveEffect(
+            user_id=user_id,
+            item_id=item.id,
+            effect_type=item.effect_type,
+            effect_value=item.effect_value,
+            expires_at=expires_at
+        )
+        db.session.add(effect)
+        flash(f"{item.name} activated: {item.effect_type} +{int(item.effect_value * 100)}% for {item.effect_duration_hours}h")
+    else:
+        flash("This item cannot be used.")
+
+    # Decrement quantity and delete if zero
+    inventory_entry.quantity -= 1
+    if inventory_entry.quantity <= 0:
+        db.session.delete(inventory_entry)
+
+    db.session.commit()
+    return redirect(url_for('profile'))
+
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -342,11 +436,17 @@ def log_habit():
         if not log:
             log = HabitLog(habit_id=habit_id, date=date_obj)
             db.session.add(log)
-            add_xp_to_category(user_id, habit.category_id, XP_PER_LOG)
+
+            #Adds any xp boosters onto the given value
+            adjusted_xp = int(apply_effect(user_id, XP_PER_LOG, 'xp_boost'))
+            add_xp_to_category(user_id, habit.category_id, adjusted_xp)
+            print(f"XP logged: {adjusted_xp}")
     else:
         if log:
             db.session.delete(log)
-            remove_xp_from_category(user_id, habit.category_id, XP_PER_LOG)
+            adjusted_xp = int(apply_effect(user_id, XP_PER_LOG, 'xp_boost'))
+            remove_xp_from_category(user_id, habit.category_id, adjusted_xp)
+            print(f"XP removed: {adjusted_xp}")
 
     db.session.commit()
 
@@ -362,8 +462,10 @@ def log_habit():
         previous_level = session.get(session_key, calculate_level_from_xp(total_xp - XP_PER_LOG))
         if new_level > previous_level:
             level_diff = new_level - previous_level
-            coins_earned = level_diff * COINS_PER_LEVEL
-            user.coins += coins_earned
+            base_coins_earned = level_diff * COINS_PER_LEVEL
+            #Add a coin multiplier to coins earnt (if any active)
+            adjusted_coins = int(apply_effect(user_id, base_coins_earned, 'coin_multiplier'))
+            user.coins += adjusted_coins
             db.session.commit()
             session[session_key] = new_level  # Prevent duplicate rewards
 
@@ -405,13 +507,28 @@ def reset_habit_logs():
     ).all()
 
     #Remove XP per log
-    xp_removed = len(logs_to_delete) * XP_PER_LOG
+    base_xp_removed = len(logs_to_delete) * XP_PER_LOG
+
+    # Adjust XP removal based on active XP boost effects
+    now = datetime.utcnow()
+    active_xp_boosts = ActiveEffect.query.filter_by(
+        user_id=user_id,
+        effect_type='xp_boost'
+    ).filter(ActiveEffect.expires_at > now).all()
+
+    # Add all active boosts onto each other
+    total_boost = sum(effect.effect_value for effect in active_xp_boosts)
+
+    # Adjust XP removed considering boosts (divide base XP by (1 + total_boost))
+    adjusted_xp_removed = round(base_xp_removed / (1 + total_boost)) if total_boost > 0 else base_xp_removed
+
     for log in logs_to_delete:
         db.session.delete(log)
 
     #Remove XP from user's progress for that category
-    if xp_removed > 0:
-        remove_xp_from_category(user_id, habit.category_id, xp_removed)
+    if adjusted_xp_removed > 0:
+        remove_xp_from_category(user_id, habit.category_id, adjusted_xp_removed)
+        print(f"Total xp removed: {adjusted_xp_removed}")
 
     db.session.commit()
 
@@ -419,7 +536,7 @@ def reset_habit_logs():
     return jsonify({
         "status": "reset_successful",
         "logs_deleted": len(logs_to_delete),
-        "xp_removed": xp_removed
+        "xp_removed": adjusted_xp_removed
     })
 
 @app.route('/get_category_progress/<int:category_id>')
@@ -456,6 +573,6 @@ if __name__ == '__main__':
     with app.app_context():
         db.create_all()
         seed_categories()
-        #seed_shop_items()
+        seed_shop_items()
     app.run()
 
