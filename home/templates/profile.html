@@ -43,7 +43,7 @@
             <ul>
                 {% for item in purchased_items %}
                     <li>
-                        <strong>{{ item.shop_item.name }}</strong> — {{ item.shop_item.description }} 
+                        <strong>{{ item.shop_item.name }}</strong> {{ item.shop_item.description }} 
                         (💰{{ item.shop_item.price }} | {{ item.quantity }})
                         <form method="POST" action="{{ url_for('use_item', item_id=item.shop_item.id) }}">
                             <button type="submit">Use</button>

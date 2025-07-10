@@ -10,7 +10,7 @@
     <h2>Create a New Habit</h2>
     <form action="{{ url_for('create_habit') }}" method="post">
       <label for="title">Habit Title:</label>
-      <input type="text" id="title" name="title" required>
+      <input type="text" id="title" name="title" maxlength="100" required>
 
       <label for="category">Category:</label>
       <select id="category" name="category_id" required>

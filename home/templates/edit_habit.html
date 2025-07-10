@@ -10,7 +10,7 @@
     <h1>Edit Habit</h1>
     <form method="POST">
     <label for="title">New Title:</label>
-    <input type="text" name="title" id="title" value="{{ habit.title }}"><br><br>
+    <input type="text" name="title" id="title" value="{{ habit.title }}" maxlength="100"><br><br>
 
     <label for="category_id">New Category:</label>
     <select name="category_id" id="category_id" required>

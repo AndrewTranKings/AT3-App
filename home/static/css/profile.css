@@ -63,7 +63,7 @@ body {
     font-family: Arial, sans-serif;
 }
 
-ul { /*unorder list elements*/
+nav ul { /*unorder list elements*/
     list-style: none;
     background: cornflowerblue;
     text-align: left;
@@ -124,6 +124,62 @@ ul li:hover ul.dropdown {
 }
 
 .purchased-items li {
-    padding: 8px 0;
+    padding: 12px;
     border-bottom: 1px solid #ddd;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #ffffff;
+    border-radius: 5px;
+    margin-bottom: 8px;
+}
+
+.purchased-items li strong {
+    color: #2a4d8f;
+    
+}
+
+.purchased-items form {
+    margin-left: 10px;
+}
+
+.purchased-items button {
+    background-color: cornflowerblue;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 6px 12px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.purchased-items button:hover {
+    background-color: rgb(39, 90, 183);
+}
+
+/*Active Effects Section*/
+.active-effects {
+    margin: 30px auto; /* Centered block */
+    padding: 20px;
+    max-width: 600px;
+    background-color: #eaf4ff;
+    border: 2px solid #6495ED; /* Lighter blue */
+    border-radius: 10px;
+}
+
+.active-effects h3 {
+    color: #4169E1; /* Royal Blue */
+    margin-bottom: 10px;
+}
+
+.active-effects ul {
+    list-style-type: none;
+    padding-left: 0;
+}
+
+.active-effects li {
+    padding: 6px 0;
+    border-bottom: 1px solid #d0d7e6;
+    font-size: 16px;
+    color: #333;
 }

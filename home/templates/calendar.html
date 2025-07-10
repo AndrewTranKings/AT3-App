@@ -25,6 +25,16 @@
         </ul>
     </nav>
 
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <ul class="flashes">
+            {% for category, message in messages %}
+                <li class="flash-message {{ category }}">{{ message }}</li>
+            {% endfor %}
+            </ul>
+        {% endif %}
+    {% endwith %}
+
     <!-- XP Progress Bar Container -->
     <div id="xp-bar-container">
     <!-- Title -->
@@ -60,11 +70,20 @@
      <div id = "clendarContainer">
         <div id="calendarDiv">
             <div id="calendarHeading">
-                <p id="habitTitle">My New Habit</p>
+                <p id="habitTitle">Hello {{user.username}}!</p>
                 <p id="totalDays">0/<span id="daysInMonth"></span></p>
             </div>
             <div id="calendarContent">
                 <div id="tracker">
+                    <div class="day-names">
+                        <div>Sun</div>
+                        <div>Mon</div>
+                        <div>Tue</div>
+                        <div>Wed</div>
+                        <div>Thu</div>
+                        <div>Fri</div>
+                        <div>Sat</div>
+                    </div>
                     <div class="days">
                         <div class="day">1</div>
                         <div class="day">1</div>

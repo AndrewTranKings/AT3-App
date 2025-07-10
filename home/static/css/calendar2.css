@@ -78,13 +78,6 @@ body {
     transition: background-color 0.3s;
 }
 
-/* Current Day Highlight
-.day.current {
-    background: #ff4500;
-    color: white;
-}
-*/
-
 /* Empty (out-of-month) days - Remove hover and click */
 .day:empty {
     background-color: white;
@@ -92,17 +85,22 @@ body {
     pointer-events: none;
 }
 
-/* Hover and Active States 
-.day:hover {
-    background: #007bff;
-    color: white;
+/*Days of the week list*/
+.day-names {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    text-align: center;
+    font-weight: bold;
+    padding: 0.5rem 0;
+    background-color: #f0f0f0;
+    border-bottom: 2px solid #ccc;
 }
 
-.day.active {
-    background: #28a745;
-    color: white;
+.day-names div {
+    padding: 0.5rem;
+    font-size: 1rem;
+    color: #333;
 }
-*/
 
 /* Reset Button */
 #resetButton {
@@ -128,7 +126,7 @@ body {
     font-family: Arial, sans-serif;
 }
 
-ul { /*unorder list elements*/
+nav ul { /*unorder list elements*/
     list-style: none;
     background: cornflowerblue;
     text-align: left;
@@ -375,3 +373,31 @@ button:disabled {
     color: #1E90FF; /* lighter blue */
   }
 }
+
+/*Flashes on the Calendar*/
+.flashes {
+    list-style-type: none;
+    padding: 0;
+    margin: 20px auto;
+    max-width: 600px;
+}
+
+.flash-message {
+    background-color: #e6f7ff;
+    border: 1px solid #91d5ff;
+    padding: 12px;
+    border-radius: 5px;
+    color: #0050b3;
+    font-weight: bold;
+    text-align: center;
+    margin-bottom: 10px;
+    opacity: 1; /* Fully visible by default */
+    transition: opacity 1s ease-out;
+}
+
+.flash-message.success {
+    background-color: #f6ffed;
+    border-color: #b7eb8f;
+    color: #389e0d;
+}
+

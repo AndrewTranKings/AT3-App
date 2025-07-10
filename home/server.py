@@ -145,7 +145,8 @@ def calendar():
         'calendar.html', 
         all_users = all_users, 
         all_user_habits = all_user_habits,
-        user_coins=user_coins
+        user_coins=user_coins,
+        user=user
         )
 
 @app.route('/profile', methods=['GET'])
@@ -247,7 +248,8 @@ def buy_item(item_id):
             db.session.add(inventory_entry)
         
         db.session.commit()
-        return jsonify({"success": True})
+        flash(f"You successfully purchased {item.name}!", "success")
+        return redirect(url_for('calendar'))
     
 @app.route('/use_item/<int:item_id>', methods=['POST'])
 def use_item(item_id):
@@ -573,6 +575,6 @@ if __name__ == '__main__':
     with app.app_context():
         db.create_all()
         seed_categories()
-        seed_shop_items()
+        #seed_shop_items()
     app.run()
 
