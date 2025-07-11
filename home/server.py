@@ -1,15 +1,17 @@
-from flask import Flask, render_template, url_for, redirect, request, jsonify, session, flash
-from data import db, User, Habit, HabitLog, Category, UserCategoryProgress, ShopItem, UserInventory, ActiveEffect
+from flask import Flask, render_template, url_for, redirect, request, jsonify, session, flash, abort
+from data import db, User, Habit, HabitLog, Category, UserCategoryProgress, ShopItem, UserInventory, ActiveEffect, Friend
 from user import create_new_user, update_user_profile, initialise_user_category_progress, add_xp_to_category, remove_xp_from_category, get_xp_threshold, calculate_level_from_xp
 from habit import create_new_habit, edit_a_habit, delete_a_habit
 from active_effect import apply_effect
 import os
 from datetime import datetime, timedelta
 from constants import XP_PER_LOG, COINS_PER_LEVEL
+from collections import defaultdict
+from sqlalchemy import func, desc
 
 app = Flask(__name__)
 app.secret_key = os.urandom(24) #Generate a random session key
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///app_database_habits.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///app_database_habits2.db'
 upload_folder = app.config['UPLOAD_FOLDER'] = os.path.join('home', 'static', 'Images', 'profile_pics') #Folder for uploaded profile pictures
 app.config['MAX_CONTENT_LENGTH'] = 2 * 1024 * 1024  # 2MB limit
 db.init_app(app)
@@ -160,11 +162,41 @@ def profile():
     purchased_items = UserInventory.query.filter_by(user_id=user_id).all()
     active_effects = ActiveEffect.query.filter_by(user_id=user_id).filter(ActiveEffect.expires_at > datetime.utcnow()).all()
 
+    #Get user's friends
+    accepted_friends = Friend.query.filter(
+        ((Friend.sender_id == user_id) | (Friend.receiver_id == user_id)) &
+        (Friend.status == 'accepted')
+    ).all()
+
+    #Get the user object for each friend account
+    friend_users = []
+    for f in accepted_friends:
+        friend_id = f.receiver_id if f.sender_id == user_id else f.sender_id
+        friend = User.query.get(friend_id)
+        if friend:
+            friend_users.append(friend)
+
+    #Get top 3 habits for each friend (by log count)
+    friend_top_habits = {}
+    for friend in friend_users:
+        top_habits = (
+            db.session.query(Habit)
+            .join(HabitLog, Habit.id == HabitLog.habit_id)
+            .filter(Habit.user_id == friend.id)
+            .group_by(Habit.id)
+            .order_by(db.func.count(HabitLog.id).desc())
+            .limit(3)
+            .all()
+        )
+        friend_top_habits[friend.id] = top_habits
+
     return render_template(
         'profile.html', 
         user=user, 
         purchased_items=purchased_items,
-        active_effects=active_effects
+        active_effects=active_effects,
+        friend_users=friend_users,
+        friend_top_habits=friend_top_habits
         )
 
 @app.route('/edit_profile', methods=['GET', 'POST'])
@@ -187,7 +219,97 @@ def edit_profile():
 
 @app.route('/community')
 def community():
-    return render_template('community.html')
+    #Session management
+    user_id = session.get('user_id')
+    if not user_id:
+        return redirect(url_for('login'))
+    user = User.query.get(user_id)
+    users = User.query.filter(User.id != user.id).all()
+
+    #Track the status of friend requests
+    friendships = Friend.query.filter(
+        ((Friend.sender_id == user_id) | (Friend.receiver_id == user_id))
+    ).all()
+
+    friend_status = {}
+    for f in friendships:
+        other_id = f.receiver_id if f.sender_id == user_id else f.sender_id
+        friend_status[other_id] = f.status
+
+    #Get an account's top 3 habits (ranked by logs)
+    users_with_habits = []
+
+    for user in users:
+        # Query to get top 3 habits for this user by habit log count
+        top_habits = (
+            db.session.query(Habit, func.count(HabitLog.id).label('log_count'))
+            .join(HabitLog, Habit.id == HabitLog.habit_id)
+            .filter(Habit.user_id == user.id)
+            .group_by(Habit.id)
+            .order_by(desc('log_count'))
+            .limit(3)
+            .all()
+        )
+        
+        #Pass in habit object
+        top_habits = [habit for habit, count in top_habits]
+
+        users_with_habits.append({
+            'user': user,
+            'top_habits': top_habits
+        })
+
+    return render_template('community.html', users_with_habits=users_with_habits, friend_status=friend_status)
+
+#Used in community.js
+@app.route('/send_friend_request/<int:receiver_id>', methods=['POST'])
+def send_friend_request(receiver_id):
+    #Session management
+    user_id = session.get('user_id')
+    if not user_id:
+        return redirect(url_for('login'))
+    existing = Friend.query.filter_by(sender_id=user_id, receiver_id=receiver_id).first()
+    if not existing:
+        new_request = Friend(sender_id=user_id, receiver_id=receiver_id, status='pending')
+        db.session.add(new_request)
+        db.session.commit()
+    return jsonify({'status': 'request_sent'})
+
+#Used in inbox.js
+@app.route('/respond_friend_request/<int:request_id>', methods=['POST'])
+def respond_friend_request(request_id):
+    #Session management
+    user_id = session.get('user_id')
+    if not user_id:
+        return redirect(url_for('login'))
+    action = request.json.get('action')
+    friend_request = Friend.query.get_or_404(request_id)
+    if friend_request.receiver_id != user_id:
+        abort(403)
+    
+    if action == 'accept':
+        friend_request.status = 'accepted'
+    elif action == 'reject':
+        friend_request.status = 'rejected'
+    
+    db.session.commit()
+    return jsonify({'status': f'{action}ed'})
+
+@app.route('/inbox')
+def inbox():
+    user_id = session.get('user_id')
+    if not user_id:
+        return redirect(url_for('login'))
+
+    #Retrieve all pending friend requests
+    incoming_requests = Friend.query.filter_by(receiver_id=user_id, status='pending').all()
+    #Retrieve all sender accounts of those friend requests
+    senders = [User.query.get(req.sender_id) for req in incoming_requests]
+    #Zip requests and senders together as a list of tuples
+    requests_and_senders = list(zip(incoming_requests, senders))
+
+    return render_template('inbox.html', requests_and_senders=requests_and_senders)
+
 
 @app.route('/shop')
 def shop():

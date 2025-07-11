@@ -5,7 +5,7 @@ body {
     background-color: #f4f8ff;
     color: #333;
     margin: 0;
-    padding: 20px;
+    padding: 0px;
 }
 
 h2 {
@@ -65,4 +65,80 @@ p {
 
 .shop_item button:hover {
     background-color: #4a79d1;
+}
+
+/* Reset & Font */
+* {
+  margin: 0;
+  padding: 0;
+  font-family: Arial, sans-serif;
+}
+
+/* NAVIGATION BAR */
+nav ul {
+  list-style: none;
+  background: cornflowerblue;
+  text-align: left;
+}
+
+nav ul li {
+  display: inline-block;
+  position: relative;
+}
+
+nav ul li a {
+  display: block;
+  padding: 20px 25px;
+  color: white;
+  text-decoration: none;
+  text-align: center;
+  font-size: 20px;
+}
+
+nav ul li a:hover {
+  background: rgb(39, 90, 183);
+}
+
+/* DROPDOWN MENU */
+nav ul li ul.dropdown {
+  display: none;
+  position: absolute;
+  background: cornflowerblue;
+  width: 150%;
+  z-index: 999;
+}
+
+nav ul li:hover ul.dropdown {
+  display: block;
+}
+
+nav ul li ul.dropdown li {
+  display: block;
+}
+
+/* COIN COUNTER */
+.coin_counter {
+  font-weight: 600;
+  font-size: 1.1rem;
+  padding: 6px 12px;
+  border-radius: 12px;
+  background-color: #e6f0ff;
+  color: #2c3e50;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  box-shadow: 0 2px 5px rgba(100, 149, 237, 0.3);
+  border: 1px solid #6495ED;
+  margin: 0.5rem 0;
+  max-width: fit-content;
+  transition: background-color 0.3s ease;
+}
+
+.coin_counter:hover {
+  background-color: #d6e8ff;
+}
+
+.coin_counter span {
+  font-weight: 700;
+  color: #6495ED;
 }

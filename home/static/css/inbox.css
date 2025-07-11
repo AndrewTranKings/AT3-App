@@ -1,0 +1,158 @@
+/* Base Colors */
+:root {
+    --cornflower-blue: #6495ED;
+    --cornflower-dark: #4a78c7;
+    --background: #f0f8ff;
+    --text-color: #333;
+    --white: #ffffff;
+    --light-gray: #e6ecf3;
+}
+
+/* Body Styling */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: var(--background);
+    color: var(--text-color);
+    margin: 0;
+    padding: 0px;
+}
+
+/* Heading */
+h2 {
+    text-align: center;
+    color: var(--cornflower-blue);
+    margin-bottom: 30px;
+}
+
+/* Request Container */
+.request {
+    background-color: var(--white);
+    border: 1px solid var(--light-gray);
+    border-left: 5px solid var(--cornflower-blue);
+    border-radius: 8px;
+    padding: 15px 20px;
+    margin: 15px auto;
+    max-width: 500px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+/*Profile Picture of sender*/
+.request img {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    object-fit: cover;
+    flex-shrink: 0;
+    border: 2px solid var(--cornflower-blue);
+}
+
+/* Sender Name */
+.request p {
+    margin: 0 0 10px;
+    font-size: 16px;
+}
+
+/* Buttons */
+.request button {
+    background-color: var(--cornflower-blue);
+    color: var(--white);
+    border: none;
+    padding: 8px 16px;
+    margin-right: 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background-color 0.3s ease;
+}
+
+.request button:hover {
+    background-color: var(--cornflower-dark);
+}
+
+/* No Requests Message */
+body > p {
+    text-align: center;
+    color: var(--cornflower-dark);
+    font-size: 16px;
+    margin-top: 50px;
+}
+
+/* Reset & Font */
+* {
+  margin: 0;
+  padding: 0;
+  font-family: Arial, sans-serif;
+}
+
+/* NAVIGATION BAR */
+nav ul {
+  list-style: none;
+  background: cornflowerblue;
+  text-align: left;
+}
+
+nav ul li {
+  display: inline-block;
+  position: relative;
+}
+
+nav ul li a {
+  display: block;
+  padding: 20px 25px;
+  color: white;
+  text-decoration: none;
+  text-align: center;
+  font-size: 20px;
+}
+
+nav ul li a:hover {
+  background: rgb(39, 90, 183);
+}
+
+/* DROPDOWN MENU */
+nav ul li ul.dropdown {
+  display: none;
+  position: absolute;
+  background: cornflowerblue;
+  width: 150%;
+  z-index: 999;
+}
+
+nav ul li:hover ul.dropdown {
+  display: block;
+}
+
+nav ul li ul.dropdown li {
+  display: block;
+}
+
+/* COIN COUNTER */
+.coin_counter {
+  font-weight: 600;
+  font-size: 1.1rem;
+  padding: 6px 12px;
+  border-radius: 12px;
+  background-color: #e6f0ff;
+  color: #2c3e50;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  box-shadow: 0 2px 5px rgba(100, 149, 237, 0.3);
+  border: 1px solid #6495ED;
+  margin: 0.5rem 0;
+  max-width: fit-content;
+  transition: background-color 0.3s ease;
+}
+
+.coin_counter:hover {
+  background-color: #d6e8ff;
+}
+
+.coin_counter span {
+  font-weight: 700;
+  color: #6495ED;
+}
+

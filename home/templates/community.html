@@ -4,8 +4,63 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Community</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/community.css') }}">
 </head>
 <body>
+    <nav>
+        <ul>
+            <li>
+                <a href="#">Menu</a>
+                <ul class="dropdown">
+                    <li><a href="{{ url_for('profile') }}">Profile</a></li>
+                    <li><a href="{{url_for('community')}}">Community</a></li>
+                    <li><a href="{{url_for('shop')}}">Shop</a></li>
+                    <li><a href="{{url_for('signup')}}">Sign Up</a></li>
+                    <li><a href="{{url_for('signout')}}">Sign Out</a></li>
+                </ul>
+            </li>
+            <li><a href="{{ url_for('calendar') }}">Calendar</a></li>
+            <li><a href="{{url_for('inbox')}}">Inbox</a></li>
+            <li class="coin_counter">💰 Coins: <span id="coin_count">{{user_coins }}</span></li>
+        </ul>
+    </nav>
     
+    <header class="community-header">
+        <h1>🌍 Welcome to the Community</h1>
+        <p class="subheading">Connect with other habit trackers and grow together 💪</p>
+    </header>
+
+    <div class="community-container">
+        {% for entry in users_with_habits %}
+            {% set user = entry.user %}
+            <div class="user-card">
+                <img src="{{ url_for('static', filename=user.profile_pic) if user.profile_pic else url_for('static', filename='images/DefaultProfilePic.png') }}" alt="Profile Picture of {{ user.username }}" />
+                <p>{{ user.username }}</p>
+
+                <div class="top-habits">
+                    {% if entry.top_habits %}
+                        <ul>
+                            {% for habit in entry.top_habits %}
+                                <li>{{ habit.title }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <p class="no-habits">No habits yet</p>
+                    {% endif %}
+                </div>
+
+                {% if friend_status.get(user.id) == 'accepted' %}
+                    <button disabled>Friends ✅</button>
+                {% elif friend_status.get(user.id) == 'pending' %}
+                    <button disabled>Request Sent 🕓</button>
+                {% else %}
+                    <button id="add-friend-btn-{{ user.id }}" onclick="sendFriendRequest({{ user.id }})">Add Friend</button>
+                {% endif %}
+            </div>
+        {% endfor %}
+    </div>
+
+    <script src="{{ url_for('static', filename='JavaScript/community.js') }}"></script>
 </body>
+
 </html>

@@ -1,0 +1,198 @@
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #f4f7fc;
+  margin: 0;
+  padding: 0px;
+  color: #333;
+}
+
+.user-card {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(100, 149, 237, 0.15); /* Cornflower Blue shadow */
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 15px 20px;
+  margin-bottom: 15px;
+  transition: box-shadow 0.3s ease;
+}
+
+.user-card:hover {
+  box-shadow: 0 8px 24px rgba(100, 149, 237, 0.3);
+}
+
+.user-card img {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  border: 3px solid #6495ED; /* Cornflower Blue border */
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.user-card p {
+  font-size: 1.1rem;
+  font-weight: 600;
+  flex-grow: 1;
+  margin: 0;
+  color: #222;
+}
+
+.user-card button {
+  background-color: #6495ED;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 18px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  box-shadow: 0 4px 8px rgba(100, 149, 237, 0.4);
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.user-card button:hover:not([disabled]) {
+  background-color: #4177c9; /* Slightly darker blue on hover */
+  box-shadow: 0 6px 14px rgba(65, 119, 201, 0.5);
+}
+
+.user-card button:disabled {
+  background-color: #b0b8c7;
+  cursor: default;
+  box-shadow: none;
+  color: #6b6f7c;
+}
+
+.community-header {
+  text-align: center;
+  margin-bottom: 30px;
+  padding-top: 20px;
+}
+
+.community-header h1 {
+  font-size: 2.5rem;
+  color: #4169E1; /* Stronger Cornflower Blue */
+  margin-bottom: 10px;
+}
+
+.community-header .subheading {
+  font-size: 1.1rem;
+  color: #5a5a5a;
+  font-weight: 400;
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+/*Container to center cards */
+.community-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+.top-habits {
+    margin: 8px 0;
+    text-align: center;
+}
+
+.top-habits ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.top-habits li {
+  background-color: #dce8ff;
+  color: #4169E1;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 0.85rem;
+  box-shadow: 0 1px 3px rgba(100, 149, 237, 0.2);
+}
+
+.no-habits {
+  font-size: 0.85rem;
+  color: #aaa;
+  font-style: italic;
+}
+
+/* Reset & Font */
+* {
+  margin: 0;
+  padding: 0;
+  font-family: Arial, sans-serif;
+}
+
+/* NAVIGATION BAR */
+nav ul {
+  list-style: none;
+  background: cornflowerblue;
+  text-align: left;
+}
+
+nav ul li {
+  display: inline-block;
+  position: relative;
+}
+
+nav ul li a {
+  display: block;
+  padding: 20px 25px;
+  color: white;
+  text-decoration: none;
+  text-align: center;
+  font-size: 20px;
+}
+
+nav ul li a:hover {
+  background: rgb(39, 90, 183);
+}
+
+/* DROPDOWN MENU */
+nav ul li ul.dropdown {
+  display: none;
+  position: absolute;
+  background: cornflowerblue;
+  width: 150%;
+  z-index: 999;
+}
+
+nav ul li:hover ul.dropdown {
+  display: block;
+}
+
+nav ul li ul.dropdown li {
+  display: block;
+}
+
+/* COIN COUNTER */
+.coin_counter {
+  font-weight: 600;
+  font-size: 1.1rem;
+  padding: 6px 12px;
+  border-radius: 12px;
+  background-color: #e6f0ff;
+  color: #2c3e50;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  box-shadow: 0 2px 5px rgba(100, 149, 237, 0.3);
+  border: 1px solid #6495ED;
+  margin: 0.5rem 0;
+  max-width: fit-content;
+  transition: background-color 0.3s ease;
+}
+
+.coin_counter:hover {
+  background-color: #d6e8ff;
+}
+
+.coin_counter span {
+  font-weight: 700;
+  color: #6495ED;
+}

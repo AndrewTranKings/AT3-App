@@ -19,9 +19,21 @@ class User(db.Model):
         self.username = username
         self.password = password
 
+class Friend(db.Model): #For friend requesting other accounts
+    id = db.Column(db.Integer, primary_key=True)
+    sender_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    receiver_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    status = db.Column(db.String(20), nullable=False, default='pending') #E.g. pending, accepted, rejected, blocked
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    #Prevent duplicate friend requests
+    __table_args__ = (db.UniqueConstraint('sender_id', 'receiver_id', name='unique_friendship'),)
+
+
 class Habit(db.Model):
     id = db.Column(db.Integer, primary_key = True)
     title = db.Column(db.String(100), nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     #One category can have multiple habits
     category_id = db.Column(db.Integer, db.ForeignKey('category.id'), nullable=False)

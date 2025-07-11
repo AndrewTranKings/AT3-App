@@ -1,4 +1,4 @@
-from data import db, User, Category, UserCategoryProgress
+from data import db, User, Category, UserCategoryProgress, Friend
 import uuid
 import os
 from werkzeug.utils import secure_filename
@@ -85,6 +85,21 @@ def update_user_profile(user_id, email_input, bio_input, pfp_input, upload_folde
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+def is_friends_with(self, other_user):
+    return Friend.query.filter(
+        ((Friend.sender_id == self.id) & (Friend.receiver_id == other_user.id)) |
+        ((Friend.sender_id == other_user.id) & (Friend.receiver_id == self.id)),
+        Friend.status == 'accepted'
+    ).first() is not None
+
+def has_pending_request_with(self, other_user):
+    return Friend.query.filter(
+        ((Friend.sender_id == self.id) & (Friend.receiver_id == other_user.id)) |
+        ((Friend.sender_id == other_user.id) & (Friend.receiver_id == self.id)),
+        Friend.status == 'pending'
+    ).first() is not None
+
 
 #MUST ADD A VISUAL ALERT FOR USER TO KNOW FILE TYPE IS INCORRECT
 #Make other effect types
