@@ -121,7 +121,8 @@ nav ul li ul.dropdown {
   z-index: 999;
 }
 
-nav ul li:hover ul.dropdown {
+nav ul li:hover ul.dropdown,
+ul li:focus-within ul.dropdown {
   display: block;
 }
 

@@ -36,6 +36,12 @@ body {
     margin-bottom: 15px;
 }
 
+.dob {
+    font-size: 15px;
+    color: rgb(99, 99, 99);
+    margin-bottom: 15px;
+}
+
 .bio {
     font-size: 16px;
     margin-bottom: 20px;
@@ -99,7 +105,8 @@ ul li a:hover { /*when mouse hovers over drop down*/
     background: rgb(39, 90, 183)
 }
 
-ul li:hover ul.dropdown {
+ul li:hover ul.dropdown,
+ul li:focus-within ul.dropdown {
     display: block;
 }
 
@@ -114,7 +121,7 @@ ul li:hover ul.dropdown {
 }
 
 .purchased-items h3 {
-    color: cornflowerblue;
+    color: #4169E1; /* Royal Blue */
     margin-bottom: 10px;
 }
 

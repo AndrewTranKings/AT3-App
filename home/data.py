@@ -7,17 +7,22 @@ class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(100), nullable=False, unique=True)
     password = db.Column(db.String(100), nullable=False)
-    email = db.Column(db.String(100), unique=True, nullable=True)
+    email = db.Column(db.String(100), unique=True, nullable=False)
+    dob = db.Column(db.Date, nullable=False)
     bio = db.Column(db.Text, nullable=True)
     profile_pic = db.Column(db.String(200), nullable=True) #String stores path to image
+    role = db.Column(db.String(10), default='user')
     coins = db.Column(db.Integer, default=0)
-    habits = db.relationship('Habit', backref='user', lazy=True)
+    habits = db.relationship('Habit', backref='user', cascade='all, delete-orphan', passive_deletes=True, lazy=True)
     #Allows one user to have progress for multiple categories
-    category_progress = db.relationship('UserCategoryProgress', back_populates='user', lazy=True)
+    category_progress = db.relationship('UserCategoryProgress', back_populates='user', lazy=True, cascade="all, delete-orphan")
 
-    def __init__(self, username, password):
+    def __init__(self, username, email, dob, password, role):
         self.username = username
+        self.email = email
+        self.dob = dob
         self.password = password
+        self.role = role
 
 class Friend(db.Model): #For friend requesting other accounts
     id = db.Column(db.Integer, primary_key=True)
@@ -39,7 +44,7 @@ class Habit(db.Model):
     category_id = db.Column(db.Integer, db.ForeignKey('category.id'), nullable=False)
     category = db.relationship('Category', backref='habits')
 
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable = False)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id', ondelete='CASCADE'), nullable = False)
     logs = db.relationship('HabitLog', backref='habit', lazy=True, cascade='all, delete-orphan')
 
     def __init__(self, title, category_id, user_id):
@@ -113,3 +118,15 @@ class ActiveEffect(db.Model):
 
     user = db.relationship("User", backref="active_effects")
     item = db.relationship("ShopItem")
+
+class GlobalHabit(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(100), nullable=False)
+    description = db.Column(db.Text, nullable=True)
+    category_id = db.Column(db.Integer, db.ForeignKey('category.id'), nullable=False)
+    category = db.relationship('Category')
+
+    def __init__(self, title, category_id, description=None):
+        self.title = title
+        self.category_id = category_id
+        self.description = description

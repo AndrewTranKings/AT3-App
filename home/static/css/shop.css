@@ -108,7 +108,8 @@ nav ul li ul.dropdown {
   z-index: 999;
 }
 
-nav ul li:hover ul.dropdown {
+nav ul li:hover ul.dropdown,
+ul li:focus-within ul.dropdown {
   display: block;
 }
 
@@ -142,3 +143,37 @@ nav ul li ul.dropdown li {
   font-weight: 700;
   color: #6495ED;
 }
+
+.flash-messages {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 9999;
+}
+
+.alert {
+  padding: 12px 20px;
+  margin-bottom: 10px;
+  border-radius: 5px;
+  color: white;
+  font-weight: bold;
+  animation: fadeOut 0.5s ease-in-out 3s forwards;
+}
+
+.alert-success {
+  background-color: #28a745;
+}
+
+.alert-error {
+  background-color: #dc3545;
+}
+
+@keyframes fadeOut {
+  to {
+    opacity: 0;
+    transform: translateX(-50%) translateY(-10px);
+  }
+}
+
+

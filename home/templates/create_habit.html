@@ -10,13 +10,17 @@
     <h2>Create a New Habit</h2>
     <form action="{{ url_for('create_habit') }}" method="post">
       <label for="title">Habit Title:</label>
-      <input type="text" id="title" name="title" maxlength="100" required>
+      <input type="text" id="title" name="title" maxlength="100" required value="{{ prefill_title | default('') }}">
 
       <label for="category">Category:</label>
       <select id="category" name="category_id" required>
         <option value="">-- Select a Category --</option>
         {% for category in categories %}
-          <option value="{{ category.id }}">{{ category.name }}</option>
+          <option value="{{ category.id }}"
+            {% set prefill_category_id = 1 %}
+          >
+            {{ category.name }}
+          </option>
         {% endfor %}
       </select>
 

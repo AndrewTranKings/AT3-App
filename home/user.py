@@ -2,6 +2,10 @@ from data import db, User, Category, UserCategoryProgress, Friend
 import uuid
 import os
 from werkzeug.utils import secure_filename
+from werkzeug.security import generate_password_hash
+from datetime import datetime, timedelta
+from itsdangerous import URLSafeTimedSerializer
+from flask import current_app
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'} #only file types allowed for pfp
 
 def initialise_user_category_progress(user_id):
@@ -46,23 +50,27 @@ def remove_xp_from_category(user_id, category_id, xp_amount):
         db.session.commit()
     
 
-def create_new_user(username_input, password_input):
+def create_new_user(username_input, email_input, dob_input, password_input, role='user'):
     # Check if username already exists
     existing_user = User.query.filter_by(username=username_input).first()
     if existing_user:
         return None  # Or raise an exception or handle it however you want
+    
+    dob_date = datetime.strptime(dob_input, "%Y-%m-%d").date()
 
-    new_user = User(username=username_input, password=password_input)
+    new_user = User(username=username_input, email=email_input, dob=dob_date, password=password_input, role=role)
     db.session.add(new_user)
     db.session.commit()
 
     initialise_user_category_progress(new_user.id)
     return new_user
 
-def update_user_profile(user_id, email_input, bio_input, pfp_input, upload_folder):
+def update_user_profile(user_id, email_input, dob_input, bio_input, pfp_input, upload_folder):
     user = User.query.get(user_id)
+    dob_date = datetime.strptime(dob_input, "%Y-%m-%d").date()
     if user:
         user.email = email_input
+        user.dob = dob_date
         user.bio = bio_input
         
         # Save new profile picture if uploaded
@@ -100,8 +108,5 @@ def has_pending_request_with(self, other_user):
         Friend.status == 'pending'
     ).first() is not None
 
-
 #MUST ADD A VISUAL ALERT FOR USER TO KNOW FILE TYPE IS INCORRECT
-#Make other effect types
-#Either every item has an effect or type none items have no 'use' button
-#Store how much xp was awarded for a log and then use it for fair xp removal (leave this last, not essential)
+#Switch to HTTPS server

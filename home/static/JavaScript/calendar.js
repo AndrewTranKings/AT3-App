@@ -106,6 +106,8 @@ function setupCalendar() {
             } else if (dayNum <= daysInMonth) {
                 cell.innerHTML = dayNum;
                 cell.id = "day" + dayNum;
+                //Make days keyboard navigable
+                cell.setAttribute('tabindex', '0');
 
                 if (dayNum === currentDate) {
                     //The current day is outlined in black
@@ -154,6 +156,14 @@ function setupCalendar() {
                         }
                         updateCoinDisplay();
                     });
+                });
+
+                //Can log days by pressing enter or space
+                cell.addEventListener("keydown", (event) => {
+                    if (event.key === 'Enter' || event.key === ' ') {
+                        event.preventDefault();
+                        cell.click();
+                    }
                 });
 
                 dayNum++;
@@ -264,36 +274,45 @@ resetButton.onclick = function () {
 
 /*HABIT BUTTONS*/
 //ONLY ALLOW EDIT AND DELETE ONCE HABIT IS SELECTED
-const habitButtons = document.querySelectorAll('.habit_btn');
-habitButtons.forEach(button => {
-    button.addEventListener('click', () => {
-        selectedHabitId = button.getAttribute('data-habit-id');
-        selectedCategoryId = button.getAttribute('data-category-id');
+const habitButtonsContainer = document.querySelector('.habit_buttons');
 
-        console.log("Selected Habit ID:", selectedHabitId);
-        console.log("Selected Category ID:", selectedCategoryId);
+habitButtonsContainer.addEventListener('click', (event) => {
+    // Check if a .habit_btn was clicked (or inside a .habit_btn)
+    const button = event.target.closest('.habit_btn');
 
-        // Update calendar and XP bar
-        updateCalendarForSelectedHabit();
-        if (selectedCategoryId) {
-            fetch(`/get_category_progress/${selectedCategoryId}`)
-                .then(res => res.json())
-                .then(updateXPBar)
-                .catch(err => console.error("Failed to fetch XP progress:", err));
-        }
+    if (!button || !habitButtonsContainer.contains(button)) return;
 
-        // Highlight selected habit button
-        habitButtons.forEach(btn => btn.classList.remove('selected'));
-        button.classList.add('selected');
+    // Grab the habit and category IDs from data attributes
+    selectedHabitId = button.getAttribute('data-habit-id');
+    selectedCategoryId = button.getAttribute('data-category-id');
 
-        // Enable the edit/delete buttons
-        document.querySelector('.edit_habit_btn').disabled = false;
-        document.querySelector('.delete_habit_btn').disabled = false;
+    console.log("Selected Habit ID:", selectedHabitId);
+    console.log("Selected Category ID:", selectedCategoryId);
 
-        // Update the edit and delete form actions with the selected habit ID
-        document.getElementById('editHabitForm').action = `/edit_habit/${selectedHabitId}`;
-        document.getElementById('deleteHabitForm').action = `/delete_habit/${selectedHabitId}`;
+    //Update the calendar based on selected habit
+    updateCalendarForSelectedHabit();
+
+    //Fetch and update XP bar
+    if (selectedCategoryId) {
+        fetch(`/get_category_progress/${selectedCategoryId}`)
+            .then(res => res.json())
+            .then(updateXPBar)
+            .catch(err => console.error("Failed to fetch XP progress:", err));
+    }
+
+    //Highlight selected habit button
+    document.querySelectorAll('.habit_btn').forEach(btn => {
+        btn.classList.remove('selected');
     });
+    button.classList.add('selected');
+
+    //Enable edit/delete buttons
+    document.querySelector('.edit_habit_btn').disabled = false;
+    document.querySelector('.delete_habit_btn').disabled = false;
+
+    //Update the form's action URLs
+    document.getElementById('editHabitForm').action = `/edit_habit/${selectedHabitId}`;
+    document.getElementById('deleteHabitForm').action = `/delete_habit/${selectedHabitId}`;
 });
 
 //Fade out the flashed message after purchasing an item
@@ -307,4 +326,47 @@ document.addEventListener('DOMContentLoaded', () => {
         setTimeout(() => msg.remove(), 1000);  //Remove from after fading
         }, 3000); //Show for 3 seconds
   });
+});
+
+document.addEventListener('DOMContentLoaded', () => {
+  const categoryFilter = document.getElementById('category-filter');
+  const sortOrder = document.getElementById('sort-order');
+  const habitButtonsContainer = document.querySelector('.habit_buttons');
+
+  // Clone the original habit buttons once and keep in an array (master copy)
+  const masterHabitButtons = Array.from(habitButtonsContainer.querySelectorAll('.habit_btn')).map(btn => btn.cloneNode(true));
+
+  function filterAndSortHabits() {
+    const selectedCategory = categoryFilter.value;
+    const selectedSort = sortOrder.value;
+
+    // Filter from the master list to avoid cumulative filtering issues
+    let filteredHabits = masterHabitButtons.filter(btn => {
+      return selectedCategory === 'all' || btn.dataset.categoryId === selectedCategory;
+    });
+
+    // Sort habits
+    if (selectedSort === 'alpha-asc') {
+      filteredHabits.sort((a, b) => a.textContent.localeCompare(b.textContent));
+    } else if (selectedSort === 'alpha-desc') {
+      filteredHabits.sort((a, b) => b.textContent.localeCompare(a.textContent));
+    }
+    // if default, keep master order (no sort)
+
+    // Clear container and append updated buttons
+    habitButtonsContainer.innerHTML = '';
+
+    filteredHabits.forEach(btn => {
+    // Highlight the correct one based on selectedHabitId
+    if (btn.dataset.habitId === selectedHabitId) {
+        btn.classList.add('selected');
+    } else {
+        btn.classList.remove('selected');
+    }
+    habitButtonsContainer.appendChild(btn);
+    });
+  }
+
+  categoryFilter.addEventListener('change', filterAndSortHabits);
+  sortOrder.addEventListener('change', filterAndSortHabits);
 });

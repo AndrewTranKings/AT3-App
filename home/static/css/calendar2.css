@@ -162,7 +162,8 @@ ul li a:hover { /*when mouse hovers over drop down*/
     background: rgb(39, 90, 183)
 }
 
-ul li:hover ul.dropdown {
+ul li:hover ul.dropdown,
+ul li:focus-within ul.dropdown {
     display: block;
 }
 
@@ -399,5 +400,25 @@ button:disabled {
     background-color: #f6ffed;
     border-color: #b7eb8f;
     color: #389e0d;
+}
+
+/*Habit Button Controls*/
+#habit-controls {
+  margin-bottom: 10px;
+  display: flex;
+  gap: 20px;
+  align-items: center;
+  font-family: Arial, sans-serif;
+  text-align: center;
+  justify-content: center;
+}
+
+#habit-controls label {
+  font-weight: bold;
+}
+
+#habit-controls select {
+  padding: 5px;
+  font-size: 1rem;
 }
 

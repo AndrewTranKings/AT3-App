@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Inbox</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/inbox.css') }}">
+    <title>Your Habit Recommendations</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/recommendations.css') }}">
 </head>
 <body>
     <nav>
@@ -25,17 +25,24 @@
             <li class="coin_counter">💰 Coins: <span id="coin_count">{{user_coins }}</span></li>
         </ul>
     </nav>
-    <h2>Friend Requests</h2>
-    {% for request, sender in requests_and_senders %}
-        <div class="request">
-            <img src="{{ url_for('static', filename=sender.profile_pic) if sender.profile_pic else url_for('static', filename='images/DefaultProfilePic.png') }}" alt="{{ sender.username }}'s Profile Picture">
-            <p><strong>{{ sender.username }}</strong> wants to be friends</p>
-            <button onclick="respondToRequest({{ request.id }}, 'accept')">Accept</button>
-            <button onclick="respondToRequest({{ request.id }}, 'reject')">Reject</button>
-        </div>
+
+    <h1>Recommended Habits For You</h1>
+    {% if habits %}
+        <ul class="recommendation-list">
+        {% for habit in habits %}
+            <li>
+                <strong>{{ habit.title }}</strong> for <em>{{ habit.category }}</em> category
+                <a 
+                  href="{{ url_for('create_habit') }}?title={{ habit.title | urlencode }}&category={{ habit.category.name | urlencode }}" 
+                  class="add-habit-btn"
+                >
+                  Add Habit
+                </a>
+            </li>
+        {% endfor %}
+        </ul>
     {% else %}
-        <p>No pending friend requests.</p>
-    {% endfor %}
-    <script src="{{ url_for('static', filename='JavaScript/inbox.js') }}"></script>
+        <p class="empty-message">No new recommendations found right now. Keep logging!</p>
+    {% endif %}
 </body>
 </html>

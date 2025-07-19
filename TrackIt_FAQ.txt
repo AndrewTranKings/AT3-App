@@ -1,0 +1,52 @@
+
+Habit Tracker App - FAQ
+
+General
+
+Q: What is this app for?
+A: This is a habit tracker that helps you build good habits, track progress, earn XP, and level up in different areas of your life.
+
+Q: Do I need an account to use the app?
+A: Yes. You need to register and log in to save your habits, progress, and XP.
+
+Q: How do I create a new habit?
+A: On the calendar page, click the "Create Habit" button. Fill in the title, and category. You can edit these later.
+
+Q: Can I edit or delete a habit later?
+A: Yes. After clicking on a habit, click the edit or delete button under the calendar.
+
+Q: How do I log a habit as complete?
+A: Click on a habit button to enable logging for specific days.
+
+Q: What do categories do?
+A: Each habit belongs to a category (like Health, Study, etc.). Categories have their own XP and levels, helping you see which areas of life you’re improving in.
+
+Q: How does XP work?
+A: You earn XP every time you log a habit. When you earn enough XP in a category, you level up that category and unlock special items in the shop.
+
+Q: Does XP reset when I level up?
+A: No. XP is cumulative. Your progress bar just resets to show progress toward the next level.
+
+Q: What is the shop for?
+A: The shop allows you to unlock fun rewards, items, or upgrades using your levels. Some items require a certain level in a specific category.
+
+Q: How do I buy something?
+A: Go to the Shop page and click “Purchase” on items available to you. You’ll need to meet the level requirement and have the correct amount of coins.
+
+Q: Can I customise the layout or appearance of my habits?
+A: Yes! You can filter and sort your habits by category or alphabetically.
+
+Q: Can I edit my profile?
+A: Yes. Go to your profile and click “Edit Profile” to change your username, email, avatar, or bio.
+
+Q: Can I add friends?
+A: Yes! Visit the Community page to search for users and send friend requests.
+
+Q: Who can see my habits or profile?
+A: Your account is publicly discoverable on the community page however, private details like email and password are hidden from other users.
+
+Q: What is role-based access control?
+A: Admins can manage the app and delete user accounts if offensive content is being displayed.
+
+Q: I forgot my password. What do I do?
+A: Click “Forgot Password” on the login page. You’ll be asked to verify your username and date of birth.
