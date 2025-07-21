@@ -4,6 +4,8 @@ var currentDay = date.getDay();
 var currentDate = date.getDate();
 var currentYear = date.getFullYear();
 var selectedHabitId = null; //Stores the ID of the selected habit
+var selectedCategoryId = null; //Stores the category of the selected habit
+
 
 var months = [
     "January", "February", "March", "April", "May", "June",
@@ -12,11 +14,52 @@ var months = [
 
 document.getElementById("title").innerHTML = months[currentMonth];
 
+//GLOW EFFECT FOR COIN INCREASE
+function updateCoinCount(newCoinValue) {
+    const coinCounter = document.querySelector('.coin_counter');
+    const coinSpan = document.getElementById('coin_count');
+
+    if (!coinSpan) return;
+
+    // Get old coin value for comparison
+    const oldValue = parseInt(coinSpan.innerText);
+
+    // Update the coin count text
+    coinSpan.textContent = newCoinValue;
+
+    // Only animate if coins increased
+    if (newCoinValue > oldValue) {
+        // Add glow effect class
+        if (coinCounter) {
+            coinCounter.classList.add('glow');
+
+            // Remove glow class after animation duration (matches CSS duration 1.2s)
+            setTimeout(() => {
+                coinCounter.classList.remove('glow');
+            }, 1200);
+        }
+    }
+}
+
+//DYNAMICALLY UPDATE COIN COUNT ON NAV BAR
+function updateCoinDisplay() {
+    fetch('/get_user_coins')
+        .then(response => response.json())
+        .then(data => {
+            updateCoinCount(data.coins);
+        })
+        .catch(err => {
+            console.error("Failed to update coin display:", err);
+        });
+}
+
 var habitTitle = document.getElementById("habitTitle");
 habitTitle.onclick = function () {
-    let habits = prompt("What's your habit", habitTitle.innerHTML);
-    if (habits.length == 0) {
-        habitTitle.innerHTML = "Click to set your habit";
+    let habits = prompt("You can display any text, your choice! (Max 29 characters)", habitTitle.innerHTML);
+    if (!habits || habits.length === 0) {
+        habitTitle.innerHTML = "Click to write text!";
+    } else if (habits.length > 29) {
+        alert("Text too long! Please enter 29 characters or less.");
     } else {
         habitTitle.innerHTML = habits;
     }
@@ -32,28 +75,107 @@ var daysCompleted = 0;
 var totalDays = document.getElementById("totalDays");
 
 /*SETUP CALENDAR DAYS*/
-var dayCount = 0;
-var rowCount = 0;
-var days = document.getElementsByClassName("days");
+function setupCalendar() {
+    const tracker = document.getElementById("tracker");
+    tracker.innerHTML = "";
 
-for (var i = 0; i < days.length; i++) {
-    var day = days[rowCount].getElementsByClassName("day");
-    for (var j = 0; j < day.length; j++) {
-        if (dayCount == currentDate - 1) {
-            day[j].setAttribute("style", "color:CornflowerBlue;");
-            day[j].setAttribute("style", "border:2px solid black");
+    const dayNamesRow = document.createElement("div");
+    dayNamesRow.classList.add("day-names");
+    const weekdays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    weekdays.forEach(day => {
+        const dayDiv = document.createElement("div");
+        dayDiv.textContent = day;
+        dayNamesRow.appendChild(dayDiv);
+    });
+    tracker.appendChild(dayNamesRow);
+
+    const daysInMonth = getDaysInMonth(currentMonth, currentYear);
+    const firstDay = new Date(currentYear, currentMonth, 1).getDay();
+
+    let dayNum = 1;
+    while (dayNum <= daysInMonth) {
+        const weekRow = document.createElement("div");
+        weekRow.classList.add("days");
+
+        for (let i = 0; i < 7; i++) {
+            const cell = document.createElement("div");
+            cell.classList.add("day");
+
+            if (tracker.childElementCount === 1 && i < firstDay) {
+                cell.innerHTML = "";
+            } else if (dayNum <= daysInMonth) {
+                cell.innerHTML = dayNum;
+                cell.id = "day" + dayNum;
+                //Make days keyboard navigable
+                cell.setAttribute('tabindex', '0');
+
+                if (dayNum === currentDate) {
+                    //The current day is outlined in black
+                    cell.style.border = "2px solid black";
+                }
+
+                cell.addEventListener("click", function () {
+                    if (!selectedHabitId) {
+                        alert("Please select a habit first.");
+                        return;
+                    }
+
+                    let clickedDay = parseInt(this.innerText);
+                    if (isNaN(clickedDay)) return; // safeguard
+
+                    //Users can only log until the current day (no logging days that have not happened)
+                    if (
+                        currentYear === new Date().getFullYear() &&
+                        currentMonth === new Date().getMonth() &&
+                        clickedDay > currentDate
+                    )return;
+
+                    let dateKey = `${currentMonth + 1}-${clickedDay}-${currentYear}`;
+                    let currentColor = window.getComputedStyle(this).backgroundColor;
+                    let wasLogged = (currentColor === "rgb(100, 149, 237)");
+                    let completed = !wasLogged;
+
+                    this.style.backgroundColor = completed ? "CornflowerBlue" : "white";
+                    daysCompleted += completed ? 1 : -1;
+                    totalDays.textContent = `${daysCompleted}/${daysInMonth}`;
+
+                    fetch('/log_habit', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            habit_id: selectedHabitId,
+                            date: dateKey,
+                            completed: completed
+                        })
+                    }).then(response => response.json())
+                    .then(data => {
+                        if (selectedCategoryId) {
+                            fetch(`/get_category_progress/${selectedCategoryId}`)
+                                .then(res => res.json())
+                                .then(updateXPBar);
+                        }
+                        updateCoinDisplay();
+                    });
+                });
+
+                //Can log days by pressing enter or space
+                cell.addEventListener("keydown", (event) => {
+                    if (event.key === 'Enter' || event.key === ' ') {
+                        event.preventDefault();
+                        cell.click();
+                    }
+                });
+
+                dayNum++;
+            } else {
+                cell.innerHTML = "";
+            }
+
+            weekRow.appendChild(cell);
         }
 
-        if (dayCount < daysInThisMonth) {
-            day[j].innerHTML = dayCount + 1;
-            day[j].setAttribute("id", "day" + (dayCount + 1));
-            dayCount++;
-        } else {
-            day[j].innerHTML = "";
-            day[j].setAttribute("style", "background-color:white");
-        }
+        tracker.appendChild(weekRow);
     }
-    rowCount++;
 }
 
 /*UPDATE CALENDAR DEPENDING ON SELECTED HABIT*/
@@ -89,50 +211,22 @@ function updateCalendarForSelectedHabit() { //Helper function
         });
 }
 
-/*HANDLE CLICK ON CALENDAR DAYS*/
-var dayDivs = document.querySelectorAll(".day");
-for (let i = 0; i < currentDate; i++) {
-    dayDivs[i].onclick = function (e) {
-        if (!selectedHabitId) {
-            alert("Please select a habit first.");
-            return;
-        }
+/*UPDATE XP BAR TO REFLECT USER'S CURRENT XP PROGRESS*/
+function updateXPBar(categoryData) {
+    document.getElementById("category-name").textContent = categoryData.category_name || "Category";
+    document.getElementById("current-level").textContent = categoryData.level;
 
-        let num = parseInt(e.target.innerText);
-        if (isNaN(num)) return;
+    //Use total XP directly from backend
+    var currentXP = categoryData.current_xp;             // e.g. 130 XP total
+    var xpToNextLevel = categoryData.xp_to_next_level;   // e.g. 215 for level 2 → 3
 
-        let dateKey = `${currentMonth + 1}-${num}-${currentYear}`;
-        let selectedDate = document.getElementById("day" + num);
-        
-        //Find days that are already logged by exact matching cornflowerblue colour
-        let currentBgColor = window.getComputedStyle(selectedDate).backgroundColor;
-        let wasAlreadyLogged = (currentBgColor === "rgb(100, 149, 237)");
-        let markAsCompleted = !wasAlreadyLogged;
-
-        //Immediately update UI to blue or white depending on if already logged or no
-        selectedDate.style.backgroundColor = markAsCompleted ? "CornflowerBlue" : "white";
-        daysCompleted += markAsCompleted ? 1 : -1;
-        totalDays.innerHTML = `${daysCompleted}/${daysInThisMonth}`;
-
-        //Contact with server route of same name
-        fetch('/log_habit', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                habit_id: selectedHabitId,
-                date: dateKey,
-                completed: markAsCompleted
-            })
-        })
-        .then(response => response.json())
-        .then(data => {
-            console.log("Server response:", data);
-        })
-        .catch(err => {
-            console.error("Failed to log habit:", err);
-            alert("Could not save log to server.");
-        });
-    };
+    //PERCENT = totalXP / nextThreshold
+    var percent = (currentXP / xpToNextLevel) * 100;
+    
+    //Update text and bar using total XP value
+    document.getElementById("current-xp").textContent = currentXP;
+    document.getElementById("xp-to-next-level").textContent = xpToNextLevel;
+    document.getElementById("xp-bar-fill").style.width = percent + "%";
 }
 
 /*RESET BUTTON FUNCTIONALITY*/
@@ -164,6 +258,13 @@ resetButton.onclick = function () {
         daysCompleted = 0;
         totalDays.innerHTML = `${daysCompleted}/${daysInThisMonth}`;
         console.log("Logs reset for habit:", selectedHabitId);
+        
+        // Refresh XP bar
+        if (selectedCategoryId) {
+            fetch(`/get_category_progress/${selectedCategoryId}`)
+                .then(res => res.json())
+                .then(updateXPBar);
+        }
     })
     .catch(err => {
         console.error("Failed to reset logs:", err);
@@ -172,30 +273,100 @@ resetButton.onclick = function () {
 };
 
 /*HABIT BUTTONS*/
-const habitButtons = document.querySelectorAll('.habit_btn');
-habitButtons.forEach(button => {
-    button.addEventListener('click', () => {
-        selectedHabitId = button.getAttribute('data-habit-id');
-        console.log("Selected Habit ID:", selectedHabitId);
-        updateCalendarForSelectedHabit();
+//ONLY ALLOW EDIT AND DELETE ONCE HABIT IS SELECTED
+const habitButtonsContainer = document.querySelector('.habit_buttons');
 
-        /*HELPS WITH CSS FOR HIGHLIGHTING SELECTED HABIT*/
-        habitButtons.forEach(btn => btn.classList.remove('selected')); //Removes highlight from each button
-        button.classList.add('selected'); //Only highlights the selected habit
+habitButtonsContainer.addEventListener('click', (event) => {
+    // Check if a .habit_btn was clicked (or inside a .habit_btn)
+    const button = event.target.closest('.habit_btn');
+
+    if (!button || !habitButtonsContainer.contains(button)) return;
+
+    // Grab the habit and category IDs from data attributes
+    selectedHabitId = button.getAttribute('data-habit-id');
+    selectedCategoryId = button.getAttribute('data-category-id');
+
+    console.log("Selected Habit ID:", selectedHabitId);
+    console.log("Selected Category ID:", selectedCategoryId);
+
+    //Update the calendar based on selected habit
+    updateCalendarForSelectedHabit();
+
+    //Fetch and update XP bar
+    if (selectedCategoryId) {
+        fetch(`/get_category_progress/${selectedCategoryId}`)
+            .then(res => res.json())
+            .then(updateXPBar)
+            .catch(err => console.error("Failed to fetch XP progress:", err));
+    }
+
+    //Highlight selected habit button
+    document.querySelectorAll('.habit_btn').forEach(btn => {
+        btn.classList.remove('selected');
     });
+    button.classList.add('selected');
+
+    //Enable edit/delete buttons
+    document.querySelector('.edit_habit_btn').disabled = false;
+    document.querySelector('.delete_habit_btn').disabled = false;
+
+    //Update the form's action URLs
+    document.getElementById('editHabitForm').action = `/edit_habit/${selectedHabitId}`;
+    document.getElementById('deleteHabitForm').action = `/delete_habit/${selectedHabitId}`;
 });
 
-//ONLY ALLOW EDIT AND DELETE ONCE HABIT IS SELECTED
-document.querySelectorAll('.habit_btn').forEach(button => {
-    button.addEventListener('click', function () {
-        selectedHabitId = this.getAttribute('data-habit-id');
+//Fade out the flashed message after purchasing an item
+document.addEventListener('DOMContentLoaded', () => {
+    setupCalendar();
+    const flashMessages = document.querySelectorAll('.flash-message');
+    flashMessages.forEach(msg => {
+        setTimeout(() => {
+        msg.style.transition = 'opacity 1s ease-out';
+        msg.style.opacity = '0';
+        setTimeout(() => msg.remove(), 1000);  //Remove from after fading
+        }, 3000); //Show for 3 seconds
+  });
+});
 
-        // Enable buttons
-        document.querySelector('.edit_habit_btn').disabled = false;
-        document.querySelector('.delete_habit_btn').disabled = false;
+document.addEventListener('DOMContentLoaded', () => {
+  const categoryFilter = document.getElementById('category-filter');
+  const sortOrder = document.getElementById('sort-order');
+  const habitButtonsContainer = document.querySelector('.habit_buttons');
 
-        // Update form actions
-        document.getElementById('editHabitForm').action = `/edit_habit/${selectedHabitId}`;
-        document.getElementById('deleteHabitForm').action = `/delete_habit/${selectedHabitId}`;
+  // Clone the original habit buttons once and keep in an array (master copy)
+  const masterHabitButtons = Array.from(habitButtonsContainer.querySelectorAll('.habit_btn')).map(btn => btn.cloneNode(true));
+
+  function filterAndSortHabits() {
+    const selectedCategory = categoryFilter.value;
+    const selectedSort = sortOrder.value;
+
+    // Filter from the master list to avoid cumulative filtering issues
+    let filteredHabits = masterHabitButtons.filter(btn => {
+      return selectedCategory === 'all' || btn.dataset.categoryId === selectedCategory;
     });
+
+    // Sort habits
+    if (selectedSort === 'alpha-asc') {
+      filteredHabits.sort((a, b) => a.textContent.localeCompare(b.textContent));
+    } else if (selectedSort === 'alpha-desc') {
+      filteredHabits.sort((a, b) => b.textContent.localeCompare(a.textContent));
+    }
+    // if default, keep master order (no sort)
+
+    // Clear container and append updated buttons
+    habitButtonsContainer.innerHTML = '';
+
+    filteredHabits.forEach(btn => {
+    // Highlight the correct one based on selectedHabitId
+    if (btn.dataset.habitId === selectedHabitId) {
+        btn.classList.add('selected');
+    } else {
+        btn.classList.remove('selected');
+    }
+    habitButtonsContainer.appendChild(btn);
+    });
+  }
+
+  categoryFilter.addEventListener('change', filterAndSortHabits);
+  sortOrder.addEventListener('change', filterAndSortHabits);
 });

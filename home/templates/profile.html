@@ -13,27 +13,90 @@
             <li>
                 <a href="#">Menu</a>
                 <ul class="dropdown">
-                    <li><a href="{{ url_for('calendar')}}">Calendar</a></li>
                     <li><a href="{{ url_for('profile') }}">Profile</a></li>
                     <li><a href="{{url_for('community')}}">Community</a></li>
                     <li><a href="{{url_for('shop')}}">Shop</a></li>
-                    <li><a href="{{url_for('login')}}">Login</a></li>
+                    <li><a href="{{ url_for('recommendations') }}">Suggested</a></li>
                     <li><a href="{{url_for('signup')}}">Sign Up</a></li>
                     <li><a href="{{url_for('signout')}}">Sign Out</a></li>
                 </ul>
             </li>
-            <li><a href="#">Dashboard</a></li>
+            <li><a href="{{ url_for('calendar') }}">Calendar</a></li>
+            <li><a href="{{url_for('inbox')}}">Inbox</a></li>
+            <li><a href="{{url_for('instructions')}}">Instructions</a></li>
+            <li class="coin_counter">💰 Coins: <span id="coin_count">{{user_coins }}</span></li>
         </ul>
     </nav>
     <!-- Profile Section -->
     <div class="profile-container">
         <img src="{{ url_for('static', filename=user.profile_pic) if user.profile_pic else url_for('static', filename='images/DefaultProfilePic.png') }}" alt="Profile Picture" class="profile-pic">
         <h2 class="username">{{user.username}}</h2>
-        <p class="email">{{user.email or 'No Email Set'}}</p>
+        <p class="email">{{user.email}}</p>
+        <p class="dob">{{user.dob}}</p>
         <p class="bio">{{user.bio or 'No Bio Set'}}</p>
         <a href="{{ url_for('edit_profile') }}">
             <button class="edit-button">Edit Profile</button>
         </a>
     </div>
+
+    <!--Friends List-->
+    <div class="friend-list">
+        <h3>Friends</h3>
+        {% if friend_users %}
+            <div class="friends-container">
+                {% for friend in friend_users %}
+                    <div class="friend-card">
+                        <img src="{{ url_for('static', filename=friend.profile_pic) if friend.profile_pic else url_for('static', filename='images/DefaultProfilePic.png') }}" alt="{{ friend.username }}'s Profile Picture">
+                        <p>{{ friend.username }}</p>
+                        <div class="top-habits">
+                            <strong>Top Habits:</strong>
+                            <ul>
+                                {% for habit in friend_top_habits.get(friend.id, []) %}
+                                    <li>{{ habit.title }}</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p class="no-friends-msg">You have no friends yet.</p>
+        {% endif %}
+    </div>
+
+
+    <!-- User's Inventory -->
+    <div class="purchased-items">
+        <h3>Purchased Items</h3>
+        {% if purchased_items %}
+            <ul>
+                {% for item in purchased_items %}
+                    <li>
+                        <strong>{{ item.shop_item.name }}</strong> {{ item.shop_item.description }} 
+                        (💰{{ item.shop_item.price }} | {{ item.quantity }})
+                        <form method="POST" action="{{ url_for('use_item', item_id=item.shop_item.id) }}">
+                            <button type="submit">Use</button>
+                        </form>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p>You haven't bought anything yet.</p>
+        {% endif %}
+    </div>
+
+    <div class="active-effects">
+        <h3>Active Effects</h3>
+        {% if active_effects %}
+            <ul>
+            {% for effect in active_effects %}
+                <li>{{ effect.effect_type }} +{{ effect.effect_value * 100 }}% until {{ effect.expires_at.strftime('%Y-%m-%d %H:%M') }}</li>
+            {% endfor %}
+            </ul>
+        {% else %}
+            <p>No active effects</p>
+        {% endif %}
+    </div>
+
 </body>
 </html>

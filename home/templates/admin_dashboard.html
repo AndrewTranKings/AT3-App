@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/admin_dashboard.css') }}">
+</head>
+<body>
+    <nav>
+        <ul>
+            <li>
+                <a href="#">Menu</a>
+                <ul class="dropdown">
+                    <li><a href="{{ url_for('profile') }}">Profile</a></li>
+                    <li><a href="{{url_for('community')}}">Community</a></li>
+                    <li><a href="{{url_for('shop')}}">Shop</a></li>
+                    <li><a href="{{url_for('signup')}}">Sign Up</a></li>
+                    <li><a href="{{url_for('signout')}}">Sign Out</a></li>
+                </ul>
+            </li>
+            <li><a href="{{ url_for('calendar') }}">Calendar</a></li>
+            <li><a href="{{url_for('inbox')}}">Inbox</a></li>
+            <li class="coin_counter">💰 Coins: <span id="coin_count">{{user_coins }}</span></li>
+        </ul>
+    </nav>
+    <div id="admin-dashboard">
+        <h1>Admin Dashboard</h1>
+        <ul>
+        {% for user in users %}
+            <li>
+            <img src="{{ url_for('static', filename=user.profile_pic) if user.profile_pic else url_for('static', filename='images/DefaultProfilePic.png') }}" alt="Profile Picture of {{ user.username }}" />
+            {{ user.username }} - {{ user.email }}
+            {% if user.role != 'admin' %}
+                <form method="POST" action="{{ url_for('delete_user', user_id=user.id) }}" style="display:inline;">
+                <button type="submit">Delete</button>
+                </form>
+            {% endif %}
+            </li>
+        {% endfor %}
+        </ul>
+    </div>
+</body>
+</html>

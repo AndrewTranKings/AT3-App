@@ -36,6 +36,12 @@ body {
     margin-bottom: 15px;
 }
 
+.dob {
+    font-size: 15px;
+    color: rgb(99, 99, 99);
+    margin-bottom: 15px;
+}
+
 .bio {
     font-size: 16px;
     margin-bottom: 20px;
@@ -63,7 +69,7 @@ body {
     font-family: Arial, sans-serif;
 }
 
-ul { /*unorder list elements*/
+nav ul { /*unorder list elements*/
     list-style: none;
     background: cornflowerblue;
     text-align: left;
@@ -99,6 +105,205 @@ ul li a:hover { /*when mouse hovers over drop down*/
     background: rgb(39, 90, 183)
 }
 
-ul li:hover ul.dropdown {
+ul li:hover ul.dropdown,
+ul li:focus-within ul.dropdown {
     display: block;
+}
+
+/*User's Invetory Section*/
+.purchased-items {
+    margin: 30px auto;
+    padding: 20px;
+    max-width: 600px;
+    background-color: #f0f8ff;
+    border: 2px solid cornflowerblue;
+    border-radius: 10px;
+}
+
+.purchased-items h3 {
+    color: #4169E1; /* Royal Blue */
+    margin-bottom: 10px;
+}
+
+.purchased-items ul {
+    list-style-type: none;
+    padding-left: 0;
+}
+
+.purchased-items li {
+    padding: 12px;
+    border-bottom: 1px solid #ddd;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #ffffff;
+    border-radius: 5px;
+    margin-bottom: 8px;
+}
+
+.purchased-items li strong {
+    color: #2a4d8f;
+    
+}
+
+.purchased-items form {
+    margin-left: 10px;
+}
+
+.purchased-items button {
+    background-color: cornflowerblue;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 6px 12px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.purchased-items button:hover {
+    background-color: rgb(39, 90, 183);
+}
+
+/*Active Effects Section*/
+.active-effects {
+    margin: 30px auto; /* Centered block */
+    padding: 20px;
+    max-width: 600px;
+    background-color: #eaf4ff;
+    border: 2px solid #6495ED; /* Lighter blue */
+    border-radius: 10px;
+}
+
+.active-effects h3 {
+    color: #4169E1; /* Royal Blue */
+    margin-bottom: 10px;
+}
+
+.active-effects ul {
+    list-style-type: none;
+    padding-left: 0;
+}
+
+.active-effects li {
+    padding: 6px 0;
+    border-bottom: 1px solid #d0d7e6;
+    font-size: 16px;
+    color: #333;
+}
+
+/*Friends List Section*/
+.friend-list {
+    margin: 40px auto;
+    padding: 20px;
+    max-width: 800px;
+    background-color: #f4f8ff;
+    border-radius: 16px;
+    box-shadow: 0 4px 8px rgba(100, 149, 237, 0.15);
+}
+
+.friend-list h3 {
+    text-align: center;
+    font-size: 1.8rem;
+    color: #4169E1; /* Cornflower blue */
+    margin-bottom: 20px;
+}
+
+.friends-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    justify-content: center;
+}
+
+.friend-card {
+    background-color: white;
+    border: 2px solid #cfe2ff;
+    border-radius: 12px;
+    padding: 15px;
+    width: 150px;
+    text-align: center;
+    transition: transform 0.2s ease;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+}
+
+.friend-card:hover {
+    transform: translateY(-4px);
+}
+
+.friend-card img {
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-bottom: 10px;
+    border: 2px solid #4169E1;
+}
+
+.friend-card p {
+    margin: 0;
+    font-weight: 500;
+    color: #333;
+}
+
+.no-friends-msg {
+    text-align: center;
+    color: #888;
+    font-style: italic;
+}
+
+.top-habits {
+    margin: 8px 0;
+    text-align: center;
+}
+
+.top-habits ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.top-habits li {
+  background-color: #dce8ff;
+  color: #4169E1;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 0.85rem;
+  box-shadow: 0 1px 3px rgba(100, 149, 237, 0.2);
+}
+
+.no-habits {
+  font-size: 0.85rem;
+  color: #aaa;
+  font-style: italic;
+}
+
+/*Coin Counter*/
+.coin_counter {
+  font-weight: 600;
+  font-size: 1.1rem;
+  padding: 6px 12px;
+  border-radius: 12px;
+  background-color: #e6f0ff; /* Light cornflower background */
+  color: #2c3e50; /* Dark text for contrast */
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  box-shadow: 0 2px 5px rgba(100, 149, 237, 0.3); /* cornflower shadow */
+  border: 1px solid #6495ED; /* subtle border using site color */
+  margin: 0.5rem 0;
+  max-width: fit-content;
+  transition: background-color 0.3s ease;
+}
+
+.coin_counter:hover {
+  background-color: #d6e8ff;
+}
+
+.coin_counter span {
+  font-weight: 700;
+  color: #6495ED; /* coin value pops in site color */
 }

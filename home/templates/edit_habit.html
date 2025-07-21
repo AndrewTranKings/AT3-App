@@ -10,17 +10,16 @@
     <h1>Edit Habit</h1>
     <form method="POST">
     <label for="title">New Title:</label>
-    <input type="text" name="title" id="title" value="{{ habit.title }}"><br><br>
+    <input type="text" name="title" id="title" value="{{ habit.title }}" maxlength="100"><br><br>
 
-    <label for="category">New Category:</label>
-    <select name="category" id="category">
-            <option value="">-- Keep Current --</option>
-            <option value="Health" {% if habit.category == 'Health' %}selected{% endif %}>Health</option>
-            <option value="Fitness" {% if habit.category == 'Fitness' %}selected{% endif %}>Fitness</option>
-            <option value="Productivity" {% if habit.category == 'Productivity' %}selected{% endif %}>Productivity</option>
-            <option value="Mindfulness" {% if habit.category == 'Mindfulness' %}selected{% endif %}>Mindfulness</option>
-            <option value="Other" {% if habit.category == 'Other' %}selected{% endif %}>Other</option>
-        </select><br><br>
+    <label for="category_id">New Category:</label>
+    <select name="category_id" id="category_id" required>
+        {% for category in categories %}
+            <option value="{{ category.id }}" {% if category.id == habit.category_id %}selected{% endif %}>
+            {{ category.name }}
+            </option>
+        {% endfor %}
+    </select><br><br>
 
     <button type="submit">Save Changes</button>
     <a href="{{ url_for('calendar') }}"><button type="button">Cancel</button></a>

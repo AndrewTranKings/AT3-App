@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Habit Tracker</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/calendar2.css') }}">
     <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/CalendarIcon.png') }}">
@@ -11,28 +13,78 @@
             <li>
                 <a href="#">Menu</a>
                 <ul class="dropdown">
-                    <li><a href="{{ url_for('calendar') }}">Calendar</a></li>
                     <li><a href="{{ url_for('profile') }}">Profile</a></li>
                     <li><a href="{{url_for('community')}}">Community</a></li>
                     <li><a href="{{url_for('shop')}}">Shop</a></li>
-                    <li><a href="{{url_for('login')}}">Login</a></li>
+                    <li><a href="{{ url_for('recommendations') }}">Suggested</a></li>
                     <li><a href="{{url_for('signup')}}">Sign Up</a></li>
                     <li><a href="{{url_for('signout')}}">Sign Out</a></li>
                 </ul>
             </li>
-            <li><a href="#">Dashboard</a></li>
+            <li><a href="{{ url_for('calendar') }}">Calendar</a></li>
+            <li><a href="{{url_for('inbox')}}">Inbox</a></li>
+            <li><a href="{{url_for('instructions')}}">Instructions</a></li>
+            <li class="coin_counter">💰 Coins: <span id="coin_count">{{user_coins }}</span></li>
         </ul>
     </nav>
 
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <ul class="flashes">
+            {% for category, message in messages %}
+                <li class="flash-message {{ category }}">{{ message }}</li>
+            {% endfor %}
+            </ul>
+        {% endif %}
+    {% endwith %}
 
-    <!-- TITLE AND SUBTITLE-->
+    <!-- XP Progress Bar Container -->
+    <div id="xp-bar-container">
+    <!-- Title -->
+    <div id="xp-bar-title">
+        <strong>Category Progress:</strong>
+        <span id="category-name">[Category Name]</span>
+    </div>
+
+    <!-- XP Info -->
+    <div id="xp-info">
+        XP: <span id="current-xp">0</span> / <span id="xp-to-next-level">100</span> |
+        Level: <span id="current-level">1</span>
+    </div>
+
+    <!-- XP Bar -->
+    <div id="xp-bar-background">
+        <div id="xp-bar-fill" style="width: 0%;"></div>
+    </div>
+    </div>
+
+    <!--TITLE AND SUBTITLE-->
     <h1 id = "title">Month</h1>
     <h2 id = "subtitle">Monthly Habit Tracker</h2>
+
+    <!--HABIT BUTTON FILTER CONTROLS-->
+    <div id="habit-controls">
+        <label for="category-filter">Filter by Category:</label>
+        <select id="category-filter">
+            <option value="all">All</option>
+            {% for category in categories %}
+            <option value="{{ category.id }}">{{ category.name }}</option>
+            {% endfor %}
+        </select>
+
+        <label for="sort-order">Sort by:</label>
+        <select id="sort-order">
+            <option value="default">Default</option>
+            <option value="alpha-asc">A - Z</option>
+            <option value="alpha-desc">Z - A</option>
+        </select>
+    </div>
+
 
     <!--LIST OF THE USER'S HABITS AS BUTTONS-->
     <div class="habit_buttons">
         {% for habit in all_user_habits %}
-            <button class="habit_btn" data-habit-id="{{ habit.id }}">{{ habit.title }}</button>
+            <button class="habit_btn" data-habit-id="{{ habit.id }}" data-category-id="{{ habit.category.id }}">{{ habit.title }}</button>
         {% endfor %}
     </div>
 
@@ -40,11 +92,20 @@
      <div id = "clendarContainer">
         <div id="calendarDiv">
             <div id="calendarHeading">
-                <p id="habitTitle">My New Habit</p>
+                <p id="habitTitle">Hello {{user.username}}!</p>
                 <p id="totalDays">0/<span id="daysInMonth"></span></p>
             </div>
             <div id="calendarContent">
                 <div id="tracker">
+                    <div class="day-names">
+                        <div>Sun</div>
+                        <div>Mon</div>
+                        <div>Tue</div>
+                        <div>Wed</div>
+                        <div>Thu</div>
+                        <div>Fri</div>
+                        <div>Sat</div>
+                    </div>
                     <div class="days">
                         <div class="day">1</div>
                         <div class="day">1</div>
@@ -110,17 +171,15 @@
     </form>
      </div>
      <button id="resetButton">Reset Button</button>
-
-     <!--SHOW ALL USERS THAT HAVE SIGNED UP (for testing purposes, this will be removed later)-->
-     <h3>Users List</h3>
-     <div class="user_list">
-        {% for user in all_users %}
-            <h3>{{ user.username }} (ID: {{ user.id }})</h3>
-            <p>Password: {{ user.password }}</p>
-        {% endfor %}
+     
+    <div class="admin-link">
+        {% if user.role == 'admin' %}
+            <a href="{{ url_for('admin_dashboard') }}">Admin Dashboard</a>
+        {% endif %}
     </div>
-     </div>
-
+    <script> //Add AI Chatbot built on Chatbase
+        (function(){if(!window.chatbase||window.chatbase("getState")!=="initialized"){window.chatbase=(...arguments)=>{if(!window.chatbase.q){window.chatbase.q=[]}window.chatbase.q.push(arguments)};window.chatbase=new Proxy(window.chatbase,{get(target,prop){if(prop==="q"){return target.q}return(...args)=>target(prop,...args)}})}const onLoad=function(){const script=document.createElement("script");script.src="https://www.chatbase.co/embed.min.js";script.id="LU5CtHiVa6jT0BIQhF3OR";script.domain="www.chatbase.co";document.body.appendChild(script)};if(document.readyState==="complete"){onLoad()}else{window.addEventListener("load",onLoad)}})();
+    </script>
      <script src="{{ url_for('static', filename='JavaScript/calendar.js') }}"></script>
 </body>
 </html>

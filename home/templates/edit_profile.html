@@ -12,10 +12,13 @@
     <h1>Edit Your Profile</h1>
     <form method="POST" enctype="multipart/form-data">
         <label>Email:</label>
-        <input type="email" name="email" value="{{ user.email or '' }}"><br>
+        <input type="email" name="email" value="{{ user.email}}"><br>
+
+        <label>Date of Birth:</label>
+        <input type="date" name="dob" value="{{ user.dob.strftime('%Y-%m-%d') if user.dob else '' }}"><br>
 
         <label>Bio:</label>
-        <textarea name="bio">{{ user.bio or '' }}</textarea><br>
+        <textarea name="bio">{{ user.bio | e if user.bio else ''}}</textarea><br>
 
         <label>Profile Picture:</label>
         <input type="file" name="profile_pic"><br>

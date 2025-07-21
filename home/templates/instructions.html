@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Instructions</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/instructions.css') }}">
+</head>
+<body>
+    <div class="instructions-container">
+        <h2>📘 How to Use the TrackIt</h2>
+        <p>Welcome! Here's a quick guide to help you get started:</p>
+        <ul>
+            <li>🆕 <strong>Create a habit</strong> with the button below the calendar. Your habit will appear above the calendar in a container.</li>
+            <li>📅 <strong>Click on your habit's container</strong> to activate the calendar. Click a day on the calendar to create a log <em>(Note: future days cannot be logged)</em>.</li>
+            <li>🛠️ <strong>Use the edit and delete</strong> options on created habits to update or remove habit info.</li>
+            <li>🏆 <strong>Each habit logs XP</strong> for its chosen category. Stack habits in the same category to earn more XP and level up faster!</li>
+            <li>💰 <strong>Leveling up earns you coins,</strong> visible on the navigation bar. Use coins in the shop to buy items with special in-game benefits.</li>
+            <li>🎒 <strong>Purchased items</strong> will appear on your profile. Be strategic with when you choose to activate your special items!</li>
+            <li>🌐 <strong>Visit the community page</strong> to follow other accounts and view their favourite habits. Friend requests will appear in your inbox.</li>
+            <li>🤖 <strong>Check the recommendations page</strong> for personalised habit suggestions!</li>
+            <li>🔍 <strong>These instructions</strong> can always be found again in the nav bar if you get stuck.</li>
+        </ul>
+
+        <a href="{{ url_for('calendar') }}" class="continue-button">Continue To App</a>
+    </div>
+</body>
+</html>
