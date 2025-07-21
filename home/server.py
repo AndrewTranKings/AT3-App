@@ -926,7 +926,7 @@ def recommendations():
     global_habits = GlobalHabit.query.options(joinedload(GlobalHabit.category)).all()
 
     # Get habits created by others (exclude current user)
-    other_users_habits = Habit.query.options(joinedload(Habit.category), joinedload(Habit.user)).filter(Habit.user_id != user_id).all()
+    other_users_habits = Habit.query.options(joinedload(Habit.category), joinedload(Habit.user)).filter(Habit.user_id != user_id, Habit.user_id != None).all()
 
     # For simplicity, create a unified list of dicts with title, category, and source
     recommendations = []
@@ -939,11 +939,12 @@ def recommendations():
         })
 
     for habit in other_users_habits:
-        recommendations.append({
-            "title": habit.title,
-            "category": habit.category.name,
-            "source": f"From {habit.user.username}"
-        })
+        if habit.user:
+            recommendations.append({
+                "title": habit.title,
+                "category": habit.category.name,
+                "source": f"From {habit.user.username}"
+            })
 
     return render_template('recommendations.html', habits=recommendations)
 
