@@ -1,0 +1,126 @@
+Critical Functions:
+1. Create habit/milestone/task
+2. Create new user
+3. Community Screen
+4. In-game shop
+5. Log task
+
+1. Create habit:
+BEGIN New Habit
+GET user
+LET title = INPUT String
+IF title = None THEN
+	DISPLAY "Title cannot be nothing"
+ENDIF
+LET description = INPUT String
+LET category = INPUT FROM List of categories
+LET selection = INPUT FROM user's mouse
+IF selection IS Create Task Button THEN
+	Create Task
+ELSE IF selection = Publish Button THEN
+	Commit habit to user account and calendar
+	DISPLAY "Habit created successfully!"
+ENDIF
+END New Habit
+
+To create a new habit for the user, the function starts by getting the user's account to retrieve all their information and data. The user then inputs the title and description of their habit. The habit title cannot be empty. They then pick a category to place their habit into. The create task button will create sub-tasks for the habit which runs another subfunction. When the user clicks on publish the habit is added to their account and an appropriate message is displayed.
+
+
+2. Create new user:
+BEGIN Sign Up
+Get Special Characters
+LET username = INPUT String
+IF len(username) < 3 THEN 
+	Clear username
+	DISPLAY "Username must be longer than three characters"
+ELSEIF username = None THEN
+	DISPLAY "Username cannot be nothing"
+ENDIF
+LET password = INPUT String
+IF len(password) < 7 THEN
+	Clear password
+	DISPLAY "Password must be at least 8 characters long"
+ELSEIF password DOES NOT CONTAIN Special Character THEN
+	Clear password
+	DISPLAY "Password must contain a special character" + special characters
+ELSEIF password = None THEN
+	DISPLAY "Password cannot be nothing"
+ENDIF
+LET selection = INPUT FROM user's mouse
+IF selection IS Sign Up Button THEN 
+	commit user session to database
+END Sign Up
+
+In the sign up process, the algorithm begins by defining a list of special characters that will later be used for validation. The user can then input a username they want to identify their account with. The algorithm will validate this username, ensuring it's longer than three characters and not empty. The same process happens for the password however, the password must be at least eight characters long and contain a special character, (taken from the predefined list of special characters). After these two fields are filled out properly, the algorithm will wait for the user to click on the sign up button to confirm their details and send these details to the database. The user's account is then saved for future login to the system.
+
+3. Community Page:
+BEGIN Social
+GET user
+GET accounts
+FOR i=0 TO 30
+	IF account.habit IN user.habits THEN
+		DISPLAY account
+		STEP 1
+	ENDIF
+ENDFOR
+LET selection = INPUT FROM user's mouse
+IF selection IS account THEN
+	Redirect to account profile page
+ELSEIF selection IS friend_request THEN
+	Send friend request to account's inbox
+ENDIF
+END Social
+
+The application's community page contains an algorithm which determines which accounts to suggest. It begins by defining the user's account and accessing the database of all other user accounts. It then retrieves 30 accounts randomly out of the entire user database. If the retrieved accounts are tracking habits that are tracked by the user then they are displayed on the screen in a grid. This repeats until 30 suitable accounts are found that match the user's habits. Once all accounts are displayed, if the user clicks on an account that is suggested they will have the option to send a friend request to that account. The friend request will be displayed in the other user's inbox.
+
+
+4. In-game shop
+BEGIN Shop
+GET user
+GET items
+FOR i=0 TO len(AvailableItems Dictionary) STEP 1
+	IF item status IS "featured" THEN
+		DISPLAY item
+	ELSEIF item status IS "bookmarked" THEN
+		DISPLAY item
+	ENDIF
+LET selection = INPUT FROM user's mouse
+IF item IS selected THEN
+	IF user.points >= item.value THEN
+		Add item to user's inventory
+		user.points =- item.value
+	ELSEIF user.points < item.value THEN
+		DISPLAY "You do not have enough points to buy this item"
+	ENDIF
+ENDIF
+DISPLAY search bar 
+LET prompt = INPUT String
+IF prompt != NONE THEN
+	DISPLAY items that match the prompt
+ENDIF
+END Shop
+	
+
+5. Log Task
+BEGIN Log Task
+GET user
+finish = len(user.tasks)
+FOR i=0 TO finish STEP 1
+	DISPLAY task
+NEXT LET task_selection = INPUT task selection from user
+IF task_selection != None THEN
+	Update calendar (task_selection.value)
+ENDIF
+IF milestone IS completed THEN
+	print "Milestone Reached! You've earnt " + task_selection.value
+	user.points += task_selection.value
+ENDIF
+END Log Task
+
+*put begin names
+*insert THEN
+*DISPLAY
+*ELSEIF
+*ENDIF
+*Different FOR LOOPS
+*no colons or double equals
