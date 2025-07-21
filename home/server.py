@@ -559,7 +559,7 @@ def login():
         return redirect(url_for('login'))
     
     session['user_id'] = user.id
-    return redirect(url_for('calendar'))
+    return redirect(url_for('instructions'))
 
 @app.route('/signup', methods=['GET', 'POST'])
 def signup(): #The same as the login route without verification as the user is creating a new account
@@ -586,7 +586,7 @@ def signup(): #The same as the login route without verification as the user is c
         session['user_id'] = new_user.id #Automatically logs in new account
         initialise_user_category_progress(new_user.id) #Create the progress bar per category
 
-        return redirect(url_for('calendar'))
+        return redirect(url_for('instructions'))
     
 @app.route('/signout')
 def signout():
@@ -946,6 +946,15 @@ def recommendations():
         })
 
     return render_template('recommendations.html', habits=recommendations)
+
+@app.route('/instructions')
+def instructions():
+    #Session management
+    user_id = session.get('user_id')
+    if not user_id:
+        return redirect(url_for('login'))
+    return render_template('instructions.html')
+
 
 if __name__ == '__main__':
     with app.app_context():

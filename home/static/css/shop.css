@@ -17,6 +17,12 @@ p {
     font-size: 1.1em;
 }
 
+.shop-text {
+  padding: 10px;
+  font-size: 1.1em;
+  margin: 3px;
+}
+
 .shop_grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));

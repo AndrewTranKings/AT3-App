@@ -269,9 +269,10 @@ button:disabled {
 }
 
 .habit_btn {
-    padding: 10px 15px;
+    padding: 12px 24px;
+    font-size: 1rem;
     border: none;
-    border-radius: 6px;
+    border-radius: 12px;
     background-color: #e0e0e0;
     cursor: pointer;
 }
@@ -279,6 +280,10 @@ button:disabled {
 .habit_btn.selected {
     background-color: cornflowerblue;
     color: white;
+}
+
+.habit_btn:active {
+    transform: scale(0.98);
 }
 
 /* XP BAR AREA */

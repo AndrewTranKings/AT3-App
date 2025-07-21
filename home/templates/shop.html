@@ -23,6 +23,7 @@
             </li>
             <li><a href="{{ url_for('calendar') }}">Calendar</a></li>
             <li><a href="{{url_for('inbox')}}">Inbox</a></li>
+            <li><a href="{{url_for('instructions')}}">Instructions</a></li>
             <li class="coin_counter">💰 Coins: <span id="coin_count">{{user_coins }}</span></li>
         </ul>
     </nav>
@@ -37,8 +38,10 @@
             </div>
         {% endif %}
     {% endwith %}
-    <h2>🛒 Shop</h2>
-    <p>You have <strong>{{ user_coins }}</strong> coins.</p>
+    <div class="shop-text">
+        <h2>🛒 Shop</h2>
+        <p>You have <strong>{{ user_coins }}</strong> coins.</p>
+    </div>
 
     <div class="shop_grid">
     {% for item in items %}

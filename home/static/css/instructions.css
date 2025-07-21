@@ -1,0 +1,64 @@
+body {
+    margin: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f8f9fa;
+    color: #333;
+}
+
+/* Container styling */
+.instructions-container {
+    max-width: 700px;
+    margin: 60px auto;
+    padding: 30px 40px;
+    background-color: white;
+    border-radius: 16px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    border-left: 6px solid cornflowerblue;
+}
+
+/* Heading */
+.instructions-container h2 {
+    color: cornflowerblue;
+    font-size: 28px;
+    margin-bottom: 20px;
+}
+
+/* Paragraph */
+.instructions-container p {
+    font-size: 16px;
+    margin-bottom: 20px;
+}
+
+/* List */
+.instructions-container ul {
+    list-style: none;
+    padding-left: 0;
+    margin-bottom: 30px;
+}
+
+.instructions-container li {
+    margin-bottom: 12px;
+    font-size: 16px;
+    line-height: 1.5;
+    background-color: #eef4ff;
+    border-left: 4px solid cornflowerblue;
+    padding: 10px 15px;
+    border-radius: 8px;
+}
+
+/* Button */
+.continue-button {
+    display: inline-block;
+    background-color: cornflowerblue;
+    color: white;
+    text-decoration: none;
+    font-weight: 600;
+    padding: 12px 24px;
+    border-radius: 10px;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.continue-button:hover {
+    background-color: #3b73d1;
+    transform: scale(1.02);
+}
